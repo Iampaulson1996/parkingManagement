@@ -1,120 +1,104 @@
 package com.parkingManagement.dao;
 
 import com.parkingManagement.model.ParkingLot;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Объект доступа к данным для управления сущностями парковок в базе данных.
+ * DAO для управления парковками в базе данных с использованием Hibernate.
  */
 public class ParkingLotDao {
-    private final Connection connection;
+    private final EntityManager em;
 
-    public ParkingLotDao(Connection connection) {
-        this.connection = connection;
+    public ParkingLotDao(EntityManager em) {
+        this.em = em;
     }
 
     /**
      * Создаёт новую парковку в базе данных.
      *
      * @param parkingLot парковка для создания
-     * @throws SQLException при ошибке доступа к базе данных
+     * @throws PersistenceException при ошибке сохранения
      */
-    public void create(ParkingLot parkingLot) throws SQLException {
-        String sql = "INSERT INTO parking_lot (name, address, capacity) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, parkingLot.getName());
-            stmt.setString(2, parkingLot.getAddress());
-            stmt.setInt(3, parkingLot.getCapacity());
-            stmt.executeUpdate();
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    parkingLot.setId(rs.getLong(1));
-                }
-            }
+    public void create(ParkingLot parkingLot) {
+        em.getTransaction().begin();
+        try {
+            em.persist(parkingLot);
+            em.getTransaction().commit();
+        } catch (PersistenceException e) {
+            em.getTransaction().rollback();
+            throw new PersistenceException("Ошибка при создании парковки: " + e.getMessage());
         }
     }
 
     /**
-     * Находит парковку по её идентификатору.
+     * Находит парковку по идентификатору.
      *
      * @param id идентификатор парковки
      * @return парковка или null, если не найдена
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    public ParkingLot findById(Long id) throws SQLException {
-        String sql = "SELECT * FROM parking_lot WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new ParkingLot(
-                            rs.getLong("id"),
-                            rs.getString("name"),
-                            rs.getString("address"),
-                            rs.getInt("capacity")
-                    );
-                }
-                return null;
-            }
-        }
+    public ParkingLot findById(Long id) {
+        return em.find(ParkingLot.class, id);
     }
 
     /**
-     * Возвращает список всех парковок из базы данных.
+     * Возвращает список всех парковок.
      *
      * @return список парковок
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    public List<ParkingLot> findAll() throws SQLException {
-        String sql = "SELECT * FROM parking_lot";
-        List<ParkingLot> lots = new ArrayList<>();
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                lots.add(new ParkingLot(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("address"),
-                        rs.getInt("capacity")
-                ));
-            }
-        }
-        return lots;
+    public List<ParkingLot> findAll() {
+        TypedQuery<ParkingLot> query = em.createQuery("SELECT p FROM ParkingLot p", ParkingLot.class);
+        return query.getResultList();
     }
 
     /**
-     * Обновляет существующую парковку в базе данных.
+     * Обновляет парковку в базе данных.
      *
      * @param parkingLot парковка для обновления
      * @return true, если обновление успешно, false, если парковка не существует
-     * @throws SQLException при ошибке доступа к базе данных
+     * @throws PersistenceException при ошибке обновления
      */
-    public boolean update(ParkingLot parkingLot) throws SQLException {
-        String sql = "UPDATE parking_lot SET name = ?, address = ?, capacity = ? WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, parkingLot.getName());
-            stmt.setString(2, parkingLot.getAddress());
-            stmt.setInt(3, parkingLot.getCapacity());
-            stmt.setLong(4, parkingLot.getId());
-            return stmt.executeUpdate() > 0;
+    public boolean update(ParkingLot parkingLot) {
+        em.getTransaction().begin();
+        try {
+            ParkingLot existing = em.find(ParkingLot.class, parkingLot.getId());
+            if (existing == null) {
+                em.getTransaction().rollback();
+                return false;
+            }
+            em.merge(parkingLot);
+            em.getTransaction().commit();
+            return true;
+        } catch (PersistenceException e) {
+            em.getTransaction().rollback();
+            throw new PersistenceException("Ошибка при обновлении парковки: " + e.getMessage());
         }
     }
 
     /**
-     * Удаляет парковку по её идентификатору.
+     * Удаляет парковку по идентификатору.
      *
-     * @param id идентификатор парковки для удаления
+     * @param id идентификатор парковки
      * @return true, если удаление успешно, false, если парковка не существует
-     * @throws SQLException при ошибке доступа к базе данных
+     * @throws PersistenceException при ошибке удаления
      */
-    public boolean delete(Long id) throws SQLException {
-        String sql = "DELETE FROM parking_lot WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            return stmt.executeUpdate() > 0;
+    public boolean delete(Long id) {
+        em.getTransaction().begin();
+        try {
+            ParkingLot parkingLot = em.find(ParkingLot.class, id);
+            if (parkingLot == null) {
+                em.getTransaction().rollback();
+                return false;
+            }
+            em.remove(parkingLot);
+            em.getTransaction().commit();
+            return true;
+        } catch (PersistenceException e) {
+            em.getTransaction().rollback();
+            throw new PersistenceException("Ошибка при удалении парковки: " + e.getMessage());
         }
     }
 }

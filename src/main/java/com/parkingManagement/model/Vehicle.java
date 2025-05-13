@@ -1,27 +1,53 @@
 package com.parkingManagement.model;
 
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Модель автомобиля в системе управления парковкой.
+ * Сущность автомобиля в системе управления парковкой.
  */
+@Entity
+@Table(name = "vehicle")
 public class Vehicle {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long clientId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
+    @Column(name = "license_plate", nullable = false, unique = true, length = 20)
     private String licensePlate;
+
+    @Column(name = "brand", length = 50)
     private String brand;
+
+    @Column(name = "model", length = 50)
     private String model;
+
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ParkingRecord> parkingRecords = new ArrayList<>();
+
+    /**
+     * Конструктор по умолчанию для Hibernate.
+     */
+    public Vehicle() {
+    }
 
     /**
      * Конструктор для создания автомобиля.
      *
-     * @param id            идентификатор автомобиля
-     * @param clientId      идентификатор клиента
-     * @param licensePlate  регистрационный номер
-     * @param brand         марка автомобиля
-     * @param model         модель автомобиля
+     * @param id           идентификатор автомобиля
+     * @param client       клиент, владеющий автомобилем
+     * @param licensePlate регистрационный номер
+     * @param brand        марка автомобиля
+     * @param model        модель автомобиля
      */
-    public Vehicle(Long id, Long clientId, String licensePlate, String brand, String model) {
+    public Vehicle(Long id, Client client, String licensePlate, String brand, String model) {
         this.id = id;
-        this.clientId = clientId;
+        this.client = client;
         this.licensePlate = licensePlate;
         this.brand = brand;
         this.model = model;
@@ -35,12 +61,12 @@ public class Vehicle {
         this.id = id;
     }
 
-    public Long getClientId() {
-        return clientId;
+    public Client getClient() {
+        return client;
     }
 
-    public void setClientId(Long clientId) {
-        this.clientId = clientId;
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public String getLicensePlate() {
@@ -65,5 +91,13 @@ public class Vehicle {
 
     public void setModel(String model) {
         this.model = model;
+    }
+
+    public List<ParkingRecord> getParkingRecords() {
+        return parkingRecords;
+    }
+
+    public void setParkingRecords(List<ParkingRecord> parkingRecords) {
+        this.parkingRecords = parkingRecords;
     }
 }

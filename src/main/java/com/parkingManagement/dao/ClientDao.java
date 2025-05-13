@@ -1,120 +1,104 @@
 package com.parkingManagement.dao;
 
 import com.parkingManagement.model.Client;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Объект доступа к данным для управления сущностями клиентов в базе данных.
+ * DAO для управления клиентами в базе данных с использованием Hibernate.
  */
 public class ClientDao {
-    private final Connection connection;
+    private final EntityManager em;
 
-    public ClientDao(Connection connection) {
-        this.connection = connection;
+    public ClientDao(EntityManager em) {
+        this.em = em;
     }
 
     /**
      * Создаёт нового клиента в базе данных.
      *
      * @param client клиент для создания
-     * @throws SQLException при ошибке доступа к базе данных
+     * @throws PersistenceException при ошибке сохранения
      */
-    public void create(Client client) throws SQLException {
-        String sql = "INSERT INTO client (name, phone, email) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, client.getName());
-            stmt.setString(2, client.getPhone());
-            stmt.setString(3, client.getEmail());
-            stmt.executeUpdate();
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    client.setId(rs.getLong(1));
-                }
-            }
+    public void create(Client client) {
+        em.getTransaction().begin();
+        try {
+            em.persist(client);
+            em.getTransaction().commit();
+        } catch (PersistenceException e) {
+            em.getTransaction().rollback();
+            throw new PersistenceException("Ошибка при создании клиента: " + e.getMessage());
         }
     }
 
     /**
-     * Находит клиента по его идентификатору.
+     * Находит клиента по идентификатору.
      *
      * @param id идентификатор клиента
      * @return клиент или null, если не найден
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    public Client findById(Long id) throws SQLException {
-        String sql = "SELECT * FROM client WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new Client(
-                            rs.getLong("id"),
-                            rs.getString("name"),
-                            rs.getString("phone"),
-                            rs.getString("email")
-                    );
-                }
-                return null;
-            }
-        }
+    public Client findById(Long id) {
+        return em.find(Client.class, id);
     }
 
     /**
-     * Возвращает список всех клиентов из базы данных.
+     * Возвращает список всех клиентов.
      *
      * @return список клиентов
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    public List<Client> findAll() throws SQLException {
-        String sql = "SELECT * FROM client";
-        List<Client> clients = new ArrayList<>();
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                clients.add(new Client(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("phone"),
-                        rs.getString("email")
-                ));
-            }
-        }
-        return clients;
+    public List<Client> findAll() {
+        TypedQuery<Client> query = em.createQuery("SELECT c FROM Client c", Client.class);
+        return query.getResultList();
     }
 
     /**
-     * Обновляет существующего клиента в базе данных.
+     * Обновляет клиента в базе данных.
      *
      * @param client клиент для обновления
      * @return true, если обновление успешно, false, если клиент не существует
-     * @throws SQLException при ошибке доступа к базе данных
+     * @throws PersistenceException при ошибке обновления
      */
-    public boolean update(Client client) throws SQLException {
-        String sql = "UPDATE client SET name = ?, phone = ?, email = ? WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, client.getName());
-            stmt.setString(2, client.getPhone());
-            stmt.setString(3, client.getEmail());
-            stmt.setLong(4, client.getId());
-            return stmt.executeUpdate() > 0;
+    public boolean update(Client client) {
+        em.getTransaction().begin();
+        try {
+            Client existing = em.find(Client.class, client.getId());
+            if (existing == null) {
+                em.getTransaction().rollback();
+                return false;
+            }
+            em.merge(client);
+            em.getTransaction().commit();
+            return true;
+        } catch (PersistenceException e) {
+            em.getTransaction().rollback();
+            throw new PersistenceException("Ошибка при обновлении клиента: " + e.getMessage());
         }
     }
 
     /**
-     * Удаляет клиента по его идентификатору.
+     * Удаляет клиента по идентификатору.
      *
-     * @param id идентификатор клиента для удаления
+     * @param id идентификатор клиента
      * @return true, если удаление успешно, false, если клиент не существует
-     * @throws SQLException при ошибке доступа к базе данных
+     * @throws PersistenceException при ошибке удаления
      */
-    public boolean delete(Long id) throws SQLException {
-        String sql = "DELETE FROM client WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            return stmt.executeUpdate() > 0;
+    public boolean delete(Long id) {
+        em.getTransaction().begin();
+        try {
+            Client client = em.find(Client.class, id);
+            if (client == null) {
+                em.getTransaction().rollback();
+                return false;
+            }
+            em.remove(client);
+            em.getTransaction().commit();
+            return true;
+        } catch (PersistenceException e) {
+            em.getTransaction().rollback();
+            throw new PersistenceException("Ошибка при удалении клиента: " + e.getMessage());
         }
     }
 }

@@ -1,13 +1,36 @@
 package com.parkingManagement.model;
 
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Модель парковки в системе управления парковкой.
+ * Сущность парковки в системе управления парковкой.
  */
+@Entity
+@Table(name = "parking_lot")
 public class ParkingLot {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
+
+    @Column(name = "address", nullable = false, length = 255)
     private String address;
+
+    @Column(name = "capacity", nullable = false)
     private Integer capacity;
+
+    @OneToMany(mappedBy = "parkingLot", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ParkingSpace> parkingSpaces = new ArrayList<>();
+
+    /**
+     * Конструктор по умолчанию для Hibernate.
+     */
+    public ParkingLot() {
+    }
 
     /**
      * Конструктор для создания парковки.
@@ -54,5 +77,13 @@ public class ParkingLot {
 
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
+    }
+
+    public List<ParkingSpace> getParkingSpaces() {
+        return parkingSpaces;
+    }
+
+    public void setParkingSpaces(List<ParkingSpace> parkingSpaces) {
+        this.parkingSpaces = parkingSpaces;
     }
 }

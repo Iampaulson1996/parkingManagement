@@ -1,13 +1,39 @@
 package com.parkingManagement.model;
 
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Модель клиента в системе управления парковкой.
+ * Сущность клиента в системе управления парковкой.
  */
+@Entity
+@Table(name = "client")
 public class Client {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
+
+    @Column(name = "phone", length = 20)
     private String phone;
+
+    @Column(name = "email", unique = true, length = 100)
     private String email;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Vehicle> vehicles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ParkingRecord> parkingRecords = new ArrayList<>();
+
+    /**
+     * Конструктор по умолчанию для Hibernate.
+     */
+    public Client() {
+    }
 
     /**
      * Конструктор для создания клиента.
@@ -54,5 +80,21 @@ public class Client {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<Vehicle> getVehicles() {
+        return vehicles;
+    }
+
+    public void setVehicles(List<Vehicle> vehicles) {
+        this.vehicles = vehicles;
+    }
+
+    public List<ParkingRecord> getParkingRecords() {
+        return parkingRecords;
+    }
+
+    public void setParkingRecords(List<ParkingRecord> parkingRecords) {
+        this.parkingRecords = parkingRecords;
     }
 }
