@@ -1,25 +1,49 @@
 package com.parkingManagement.model;
 
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Модель парковочного места в системе управления парковкой.
+ * Сущность парковочного места в системе управления парковкой.
  */
+@Entity
+@Table(name = "parking_space")
 public class ParkingSpace {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long parkingLotId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parking_lot_id", nullable = false)
+    private ParkingLot parkingLot;
+
+    @Column(name = "space_number", nullable = false, length = 10)
     private String spaceNumber;
+
+    @Column(name = "type", nullable = false, length = 20)
     private String type;
+
+    @OneToMany(mappedBy = "parkingSpace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ParkingRecord> parkingRecords = new ArrayList<>();
+
+    /**
+     * Конструктор по умолчанию для Hibernate.
+     */
+    public ParkingSpace() {
+    }
 
     /**
      * Конструктор для создания парковочного места.
      *
-     * @param id           идентификатор парковочного места
-     * @param parkingLotId идентификатор парковки
-     * @param spaceNumber  номер парковочного места
-     * @param type         тип парковочного места (REGULAR/DISABLED/VIP)
+     * @param id          идентификатор парковочного места
+     * @param parkingLot  парковка, к которой относится место
+     * @param spaceNumber номер парковочного места
+     * @param type        тип парковочного места
      */
-    public ParkingSpace(Long id, Long parkingLotId, String spaceNumber, String type) {
+    public ParkingSpace(Long id, ParkingLot parkingLot, String spaceNumber, String type) {
         this.id = id;
-        this.parkingLotId = parkingLotId;
+        this.parkingLot = parkingLot;
         this.spaceNumber = spaceNumber;
         this.type = type;
     }
@@ -32,12 +56,12 @@ public class ParkingSpace {
         this.id = id;
     }
 
-    public Long getParkingLotId() {
-        return parkingLotId;
+    public ParkingLot getParkingLot() {
+        return parkingLot;
     }
 
-    public void setParkingLotId(Long parkingLotId) {
-        this.parkingLotId = parkingLotId;
+    public void setParkingLot(ParkingLot parkingLot) {
+        this.parkingLot = parkingLot;
     }
 
     public String getSpaceNumber() {
@@ -54,5 +78,13 @@ public class ParkingSpace {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<ParkingRecord> getParkingRecords() {
+        return parkingRecords;
+    }
+
+    public void setParkingRecords(List<ParkingRecord> parkingRecords) {
+        this.parkingRecords = parkingRecords;
     }
 }

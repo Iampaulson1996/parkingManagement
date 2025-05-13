@@ -1,34 +1,58 @@
 package com.parkingManagement.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Модель записи о парковке в системе управления парковкой.
+ * Сущность записи о парковке в системе управления парковкой.
  */
+@Entity
+@Table(name = "parking_record")
 public class ParkingRecord {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long parkingSpaceId;
-    private Long vehicleId;
-    private Long clientId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parking_space_id", nullable = false)
+    private ParkingSpace parkingSpace;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    private Vehicle vehicle;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
+    @Column(name = "entry_time", nullable = false)
     private LocalDateTime entryTime;
+
+    @Column(name = "exit_time")
     private LocalDateTime exitTime;
+
+    /**
+     * Конструктор по умолчанию для Hibernate.
+     */
+    public ParkingRecord() {
+    }
 
     /**
      * Конструктор для создания записи о парковке.
      *
-     * @param id             идентификатор записи
-     * @param parkingSpaceId идентификатор парковочного места
-     * @param vehicleId      идентификатор автомобиля
-     * @param clientId       идентификатор клиента
-     * @param entryTime      время въезда
-     * @param exitTime       время выезда
+     * @param id            идентификатор записи
+     * @param parkingSpace  парковочное место
+     * @param vehicle       автомобиль
+     * @param client        клиент
+     * @param entryTime     время въезда
+     * @param exitTime      время выезда
      */
-    public ParkingRecord(Long id, Long parkingSpaceId, Long vehicleId, Long clientId, LocalDateTime entryTime,
-                         LocalDateTime exitTime) {
+    public ParkingRecord(Long id, ParkingSpace parkingSpace, Vehicle vehicle, Client client,
+                         LocalDateTime entryTime, LocalDateTime exitTime) {
         this.id = id;
-        this.parkingSpaceId = parkingSpaceId;
-        this.vehicleId = vehicleId;
-        this.clientId = clientId;
+        this.parkingSpace = parkingSpace;
+        this.vehicle = vehicle;
+        this.client = client;
         this.entryTime = entryTime;
         this.exitTime = exitTime;
     }
@@ -41,28 +65,28 @@ public class ParkingRecord {
         this.id = id;
     }
 
-    public Long getParkingSpaceId() {
-        return parkingSpaceId;
+    public ParkingSpace getParkingSpace() {
+        return parkingSpace;
     }
 
-    public void setParkingSpaceId(Long parkingSpaceId) {
-        this.parkingSpaceId = parkingSpaceId;
+    public void setParkingSpace(ParkingSpace parkingSpace) {
+        this.parkingSpace = parkingSpace;
     }
 
-    public Long getVehicleId() {
-        return vehicleId;
+    public Vehicle getVehicle() {
+        return vehicle;
     }
 
-    public void setVehicleId(Long vehicleId) {
-        this.vehicleId = vehicleId;
+    public void setVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
     }
 
-    public Long getClientId() {
-        return clientId;
+    public Client getClient() {
+        return client;
     }
 
-    public void setClientId(Long clientId) {
-        this.clientId = clientId;
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public LocalDateTime getEntryTime() {

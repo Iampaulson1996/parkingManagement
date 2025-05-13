@@ -1,187 +1,109 @@
 package com.parkingManagement.dao;
 
 import com.parkingManagement.model.ParkingRecord;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
 
-import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Объект доступа к данным для управления записями о парковке в базе данных.
+ * DAO для управления записями о парковке в базе данных с Hibernate.
  */
 public class ParkingRecordDao {
-    private final Connection connection;
+    private final EntityManager em;
 
-    public ParkingRecordDao(Connection connection) {
-        this.connection = connection;
+    /**
+     * Создаёт новый ParkingRecordDao с указанным EntityManager.
+     *
+     * @param em менеджер сущностей Hibernate
+     */
+    public ParkingRecordDao(EntityManager em) {
+        this.em = em;
     }
 
     /**
      * Создаёт новую запись о парковке в базе данных.
      *
      * @param record запись о парковке для создания
-     * @throws SQLException             при ошибке доступа к базе данных
-     * @throws IllegalArgumentException если связанные сущности не существуют
+     * @throws PersistenceException при ошибке сохранения
      */
-    public void create(ParkingRecord record) throws SQLException {
-        String checkSpaceSql = "SELECT id FROM parking_space WHERE id = ?";
-        try (PreparedStatement checkStmt = connection.prepareStatement(checkSpaceSql)) {
-            checkStmt.setLong(1, record.getParkingSpaceId());
-            if (!checkStmt.executeQuery().next()) {
-                throw new IllegalArgumentException("Парковочное место с ID " + record.getParkingSpaceId() +
-                        " не существует");
-            }
-        }
-
-        String checkVehicleSql = "SELECT id FROM vehicle WHERE id = ?";
-        try (PreparedStatement checkStmt = connection.prepareStatement(checkVehicleSql)) {
-            checkStmt.setLong(1, record.getVehicleId());
-            if (!checkStmt.executeQuery().next()) {
-                throw new IllegalArgumentException("Автомобиль с ID " + record.getVehicleId() + " не существует");
-            }
-        }
-
-        String checkClientSql = "SELECT id FROM client WHERE id = ?";
-        try (PreparedStatement checkStmt = connection.prepareStatement(checkClientSql)) {
-            checkStmt.setLong(1, record.getClientId());
-            if (!checkStmt.executeQuery().next()) {
-                throw new IllegalArgumentException("Клиент с ID " + record.getClientId() + " не существует");
-            }
-        }
-
-        String sql = "INSERT INTO parking_record (parking_space_id, vehicle_id, client_id, entry_time, exit_time) " +
-                "VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setLong(1, record.getParkingSpaceId());
-            stmt.setLong(2, record.getVehicleId());
-            stmt.setLong(3, record.getClientId());
-            stmt.setTimestamp(4, Timestamp.valueOf(record.getEntryTime()));
-            stmt.setTimestamp(5, record.getExitTime() != null ? Timestamp.valueOf(record.getExitTime())
-                    : null);
-            stmt.executeUpdate();
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    record.setId(rs.getLong(1));
-                }
-            }
+    public void create(ParkingRecord record) {
+        em.getTransaction().begin();
+        try {
+            em.persist(record);
+            em.getTransaction().commit();
+        } catch (PersistenceException e) {
+            em.getTransaction().rollback();
+            throw new PersistenceException("Ошибка при создании записи: " + e.getMessage());
         }
     }
 
     /**
-     * Находит запись о парковке по её идентификатору.
+     * Находит запись о парковке по идентификатору.
      *
      * @param id идентификатор записи
      * @return запись о парковке или null, если не найдена
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    public ParkingRecord findById(Long id) throws SQLException {
-        String sql = "SELECT * FROM parking_record WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new ParkingRecord(
-                            rs.getLong("id"),
-                            rs.getLong("parking_space_id"),
-                            rs.getLong("vehicle_id"),
-                            rs.getLong("client_id"),
-                            rs.getTimestamp("entry_time").toLocalDateTime(),
-                            rs.getTimestamp("exit_time") != null ? rs.getTimestamp("exit_time")
-                                    .toLocalDateTime() : null
-                    );
-                }
-                return null;
-            }
-        }
+    public ParkingRecord findById(Long id) {
+        return em.find(ParkingRecord.class, id);
     }
 
     /**
-     * Возвращает список всех записей о парковке из базы данных.
+     * Возвращает список всех записей о парковке.
      *
      * @return список записей о парковке
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    public List<ParkingRecord> findAll() throws SQLException {
-        String sql = "SELECT * FROM parking_record";
-        List<ParkingRecord> records = new ArrayList<>();
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                records.add(new ParkingRecord(
-                        rs.getLong("id"),
-                        rs.getLong("parking_space_id"),
-                        rs.getLong("vehicle_id"),
-                        rs.getLong("client_id"),
-                        rs.getTimestamp("entry_time").toLocalDateTime(),
-                        rs.getTimestamp("exit_time") != null ? rs.getTimestamp("exit_time")
-                                .toLocalDateTime() : null
-                ));
-            }
-        }
-        return records;
+    public List<ParkingRecord> findAll() {
+        TypedQuery<ParkingRecord> query = em.createQuery("SELECT p FROM ParkingRecord p", ParkingRecord.class);
+        return query.getResultList();
     }
 
     /**
-     * Обновляет существующую запись о парковке в базе данных.
+     * Обновляет запись о парковке в базе данных.
      *
      * @param record запись о парковке для обновления
      * @return true, если обновление успешно, false, если запись не существует
-     * @throws SQLException             при ошибке доступа к базе данных
-     * @throws IllegalArgumentException если связанные сущности не существуют
+     * @throws PersistenceException при ошибке обновления
      */
-    public boolean update(ParkingRecord record) throws SQLException {
-        String checkSpaceSql = "SELECT id FROM parking_space WHERE id = ?";
-        try (PreparedStatement checkStmt = connection.prepareStatement(checkSpaceSql)) {
-            checkStmt.setLong(1, record.getParkingSpaceId());
-            if (!checkStmt.executeQuery().next()) {
-                throw new IllegalArgumentException("Парковочное место с ID " + record.getParkingSpaceId()
-                        + " не существует");
+    public boolean update(ParkingRecord record) {
+        em.getTransaction().begin();
+        try {
+            ParkingRecord existing = em.find(ParkingRecord.class, record.getId());
+            if (existing == null) {
+                em.getTransaction().rollback();
+                return false;
             }
-        }
-
-        String checkVehicleSql = "SELECT id FROM vehicle WHERE id = ?";
-        try (PreparedStatement checkStmt = connection.prepareStatement(checkVehicleSql)) {
-            checkStmt.setLong(1, record.getVehicleId());
-            if (!checkStmt.executeQuery().next()) {
-                throw new IllegalArgumentException("Автомобиль с ID " + record.getVehicleId() + " не существует");
-            }
-        }
-
-        String checkClientSql = "SELECT id FROM client WHERE id = ?";
-        try (PreparedStatement checkStmt = connection.prepareStatement(checkClientSql)) {
-            checkStmt.setLong(1, record.getClientId());
-            if (!checkStmt.executeQuery().next()) {
-                throw new IllegalArgumentException("Клиент с ID " + record.getClientId() + " не существует");
-            }
-        }
-
-        String sql = "UPDATE parking_record SET parking_space_id = ?, vehicle_id = ?, client_id = ?, " +
-                "entry_time = ?, exit_time = ? WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setLong(1, record.getParkingSpaceId());
-            stmt.setLong(2, record.getVehicleId());
-            stmt.setLong(3, record.getClientId());
-            stmt.setTimestamp(4, Timestamp.valueOf(record.getEntryTime()));
-            stmt.setTimestamp(5, record.getExitTime() != null ? Timestamp.valueOf(record.getExitTime())
-                    : null);
-            stmt.setLong(6, record.getId());
-            return stmt.executeUpdate() > 0;
+            em.merge(record);
+            em.getTransaction().commit();
+            return true;
+        } catch (PersistenceException e) {
+            em.getTransaction().rollback();
+            throw new PersistenceException("Ошибка при обновлении записи: " + e.getMessage());
         }
     }
 
     /**
-     * Удаляет запись о парковке по её идентификатору.
+     * Удаляет запись о парковке по идентификатору.
      *
-     * @param id идентификатор записи для удаления
+     * @param id идентификатор записи
      * @return true, если удаление успешно, false, если запись не существует
-     * @throws SQLException при ошибке доступа к базе данных
+     * @throws PersistenceException при ошибке удаления
      */
-    public boolean delete(Long id) throws SQLException {
-        String sql = "DELETE FROM parking_record WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            return stmt.executeUpdate() > 0;
+    public boolean delete(Long id) {
+        em.getTransaction().begin();
+        try {
+            ParkingRecord record = em.find(ParkingRecord.class, id);
+            if (record == null) {
+                em.getTransaction().rollback();
+                return false;
+            }
+            em.remove(record);
+            em.getTransaction().commit();
+            return true;
+        } catch (PersistenceException e) {
+            em.getTransaction().rollback();
+            throw new PersistenceException("Ошибка при удалении записи: " + e.getMessage());
         }
     }
 }

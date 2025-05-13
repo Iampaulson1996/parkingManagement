@@ -3,10 +3,11 @@ package com.parkingManagement.ui;
 import com.parkingManagement.dao.*;
 import com.parkingManagement.model.*;
 import com.parkingManagement.service.*;
-import com.parkingManagement.util.DatabaseUtil;
+import com.parkingManagement.util.HibernateUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -16,7 +17,8 @@ import java.util.Scanner;
  * Главный класс консольного приложения для управления парковкой.
  */
 public class Main {
-    private static Connection connection;
+    private static EntityManagerFactory emf;
+    private static EntityManager em;
     private static Scanner scanner;
     private static ParkingLotService parkingLotService;
     private static ParkingSpaceService parkingSpaceService;
@@ -24,64 +26,75 @@ public class Main {
     private static VehicleService vehicleService;
     private static ParkingRecordService parkingRecordService;
 
-    /**
-     * Точка входа в приложение.
-     *
-     * @param args аргументы командной строки
-     */
     public static void main(String[] args) {
         try {
-            connection = DatabaseUtil.getConnection();
+            emf = HibernateUtil.getEntityManagerFactory();
+            em = emf.createEntityManager();
             scanner = new Scanner(System.in);
-            parkingLotService = new ParkingLotService(new ParkingLotDao(connection));
-            parkingSpaceService = new ParkingSpaceService(new ParkingSpaceDao(connection));
-            clientService = new ClientService(new ClientDao(connection));
-            vehicleService = new VehicleService(new VehicleDao(connection));
-            parkingRecordService = new ParkingRecordService(new ParkingRecordDao(connection));
+            parkingLotService = new ParkingLotService(new ParkingLotDao(em));
+            parkingSpaceService = new ParkingSpaceService(new ParkingSpaceDao(em));
+            clientService = new ClientService(new ClientDao(em));
+            vehicleService = new VehicleService(new VehicleDao(em));
+            parkingRecordService = new ParkingRecordService(new ParkingRecordDao(em));
 
-            while (true) {
-                System.out.println("\n=================");
-                System.out.println("Управление парковкой");
-                System.out.println("=================");
-                System.out.println("1. Парковки");
-                System.out.println("2. Парковочные места");
-                System.out.println("3. Клиенты");
-                System.out.println("4. Автомобили");
-                System.out.println("5. Записи о парковке");
-                System.out.println("6. Выход");
-
-                int choice = getIntInput("Выберите опцию: ");
-                if (choice == 6) {
-                    System.out.println("Выход...");
-                    break;
-                }
-                if (choice < 1 || choice > 6) {
-                    System.out.println("Ошибка: неверная опция!");
-                    continue;
-                }
-
-                try {
-                    switch (choice) {
-                        case 1 -> manageParkingLots();
-                        case 2 -> manageParkingSpaces();
-                        case 3 -> manageClients();
-                        case 4 -> manageVehicles();
-                        case 5 -> manageParkingRecords();
-                    }
-                } catch (SQLException e) {
-                    System.out.println("Ошибка базы данных: " + e.getMessage());
-                }
-            }
-        } catch (SQLException e) {
+            runMainMenu();
+        } catch (PersistenceException e) {
             System.out.println("Ошибка подключения к базе данных: " + e.getMessage());
         } finally {
-            try {
-                if (connection != null) connection.close();
-            } catch (SQLException e) {
-                System.out.println("Ошибка закрытия соединения: " + e.getMessage());
-            }
-            scanner.close();
+            if (em != null && em.isOpen()) em.close();
+            if (scanner != null) scanner.close();
+            HibernateUtil.shutdown();
         }
+    }
+
+    /**
+     * Запускает главное меню приложения.
+     */
+    private static void runMainMenu() {
+        while (true) {
+            System.out.println("\n=================");
+            System.out.println("Управление парковкой");
+            System.out.println("=================");
+            System.out.println("1. Парковки");
+            System.out.println("2. Парковочные места");
+            System.out.println("3. Клиенты");
+            System.out.println("4. Автомобили");
+            System.out.println("5. Записи о парковке");
+            System.out.println("6. Выход");
+
+            int choice = getIntInput("Выберите опцию: ");
+            if (choice == 6) {
+                System.out.println("Выход...");
+                break;
+            }
+            if (choice < 1 || choice > 6) {
+                System.out.println("Ошибка: неверная опция!");
+                continue;
+            }
+
+            try {
+                switch (choice) {
+                    case 1 -> manageEntity("Парковки", Main::manageParkingLots);
+                    case 2 -> manageEntity("Парковочные места", Main::manageParkingSpaces);
+                    case 3 -> manageEntity("Клиенты", Main::manageClients);
+                    case 4 -> manageEntity("Автомобили", Main::manageVehicles);
+                    case 5 -> manageEntity("Записи о парковке", Main::manageParkingRecords);
+                }
+            } catch (IllegalArgumentException | PersistenceException e) {
+                System.out.println("Ошибка: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Выполняет управление сущностью с обработкой ошибок.
+     *
+     * @param entityName название сущности для отображения
+     * @param handler    обработчик меню для сущности
+     */
+    private static void manageEntity(String entityName, Runnable handler) {
+        System.out.println("\n=== " + entityName + " ===");
+        handler.run();
     }
 
     /**
@@ -166,20 +179,24 @@ public class Main {
     }
 
     /**
-     * Управляет операциями с парковками.
+     * Обрезает строку до указанной длины.
      *
-     * @throws SQLException при ошибке доступа к базе данных
+     * @param str       строка
+     * @param maxLength максимальная длина
+     * @return обрезанная строка
      */
-    private static void manageParkingLots() throws SQLException {
-        while (true) {
-            System.out.println("\n=== Парковки ===");
-            System.out.println("1. Создать");
-            System.out.println("2. Просмотреть");
-            System.out.println("3. Список");
-            System.out.println("4. Обновить");
-            System.out.println("5. Удалить");
-            System.out.println("6. Назад");
+    private static String shorten(String str, int maxLength) {
+        if (str == null) return "N/A";
+        if (str.length() <= maxLength) return str;
+        return str.substring(0, maxLength - 3) + "...";
+    }
 
+    /**
+     * Управляет операциями с парковками.
+     */
+    private static void manageParkingLots() {
+        while (true) {
+            displaySubMenu("Парковки");
             int choice = getIntInput("Выберите опцию: ");
             if (choice == 6) break;
             if (choice < 1 || choice > 6) {
@@ -216,7 +233,8 @@ public class Main {
                             System.out.println("--|----------------|----------------|------------");
                             for (ParkingLot lot : lots) {
                                 System.out.printf("%d | %-14s | %-14s | %d%n",
-                                        lot.getId(), shorten(lot.getName(), 14), shorten(lot.getAddress(), 14), lot.getCapacity());
+                                        lot.getId(), shorten(lot.getName(), 14),
+                                        shorten(lot.getAddress(), 14), lot.getCapacity());
                             }
                         }
                     }
@@ -248,19 +266,10 @@ public class Main {
 
     /**
      * Управляет операциями с парковочными местами.
-     *
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    private static void manageParkingSpaces() throws SQLException {
+    private static void manageParkingSpaces() {
         while (true) {
-            System.out.println("\n=== Парковочные места ===");
-            System.out.println("1. Создать");
-            System.out.println("2. Просмотреть");
-            System.out.println("3. Список");
-            System.out.println("4. Обновить");
-            System.out.println("5. Удалить");
-            System.out.println("6. Назад");
-
+            displaySubMenu("Парковочные места");
             int choice = getIntInput("Выберите опцию: ");
             if (choice == 6) break;
             if (choice < 1 || choice > 6) {
@@ -272,50 +281,53 @@ public class Main {
                 switch (choice) {
                     case 1 -> {
                         long lotId = getLongInput("Введите ID парковки: ");
+                        ParkingLot parkingLot = parkingLotService.getParkingLot(lotId);
                         String number = getStringInput("Введите номер места: ", false);
                         String type = getStringInput("Введите тип (REGULAR/DISABLED/VIP): ", false);
-                        ParkingSpace space = new ParkingSpace(null, lotId, number, type);
+                        ParkingSpace space = new ParkingSpace(null, parkingLot, number, type);
                         parkingSpaceService.createParkingSpace(space);
-                        System.out.println("Парковочное место создано с ID: " + space.getId());
+                        System.out.println("Место создано с ID: " + space.getId());
                     }
                     case 2 -> {
-                        long id = getLongInput("Введите ID парковочного места: ");
+                        long id = getLongInput("Введите ID места: ");
                         ParkingSpace space = parkingSpaceService.getParkingSpace(id);
                         System.out.println("\nПарковочное место:");
                         System.out.println("ID: " + space.getId());
                         System.out.println("Номер: " + space.getSpaceNumber());
                         System.out.println("Тип: " + space.getType());
-                        System.out.println("ID парковки: " + space.getParkingLotId());
+                        System.out.println("ID парковки: " + space.getParkingLot().getId());
                     }
                     case 3 -> {
                         List<ParkingSpace> spaces = parkingSpaceService.getAllParkingSpaces();
                         if (spaces.isEmpty()) {
-                            System.out.println("Парковочные места отсутствуют.");
+                            System.out.println("Места отсутствуют.");
                         } else {
                             System.out.println("\nСписок парковочных мест:");
                             System.out.println("ID | Номер | Тип    | ID парковки");
                             System.out.println("--|-------|--------|------------");
                             for (ParkingSpace space : spaces) {
                                 System.out.printf("%d | %-7s | %-7s | %d%n",
-                                        space.getId(), shorten(space.getSpaceNumber(), 7), shorten(space.getType(), 7), space.getParkingLotId());
+                                        space.getId(), shorten(space.getSpaceNumber(), 7),
+                                        shorten(space.getType(), 7), space.getParkingLot().getId());
                             }
                         }
                     }
                     case 4 -> {
-                        long id = getLongInput("Введите ID парковочного места: ");
+                        long id = getLongInput("Введите ID места: ");
                         long lotId = getLongInput("Введите новый ID парковки: ");
+                        ParkingLot parkingLot = parkingLotService.getParkingLot(lotId);
                         String number = getStringInput("Введите новый номер места: ", false);
                         String type = getStringInput("Введите новый тип: ", false);
-                        ParkingSpace space = new ParkingSpace(id, lotId, number, type);
+                        ParkingSpace space = new ParkingSpace(id, parkingLot, number, type);
                         parkingSpaceService.updateParkingSpace(space);
-                        System.out.println("Парковочное место обновлено");
+                        System.out.println("Место обновлено");
                     }
                     case 5 -> {
-                        long id = getLongInput("Введите ID парковочного места: ");
+                        long id = getLongInput("Введите ID места: ");
                         String confirm = getStringInput("Подтвердите удаление (да/нет): ", false);
                         if (confirm.equalsIgnoreCase("да")) {
                             parkingSpaceService.deleteParkingSpace(id);
-                            System.out.println("Парковочное место удалено");
+                            System.out.println("Место удалено");
                         } else {
                             System.out.println("Удаление отменено");
                         }
@@ -329,19 +341,10 @@ public class Main {
 
     /**
      * Управляет операциями с клиентами.
-     *
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    private static void manageClients() throws SQLException {
+    private static void manageClients() {
         while (true) {
-            System.out.println("\n=== Клиенты ===");
-            System.out.println("1. Создать");
-            System.out.println("2. Просмотреть");
-            System.out.println("3. Список");
-            System.out.println("4. Обновить");
-            System.out.println("5. Удалить");
-            System.out.println("6. Назад");
-
+            displaySubMenu("Клиенты");
             int choice = getIntInput("Выберите опцию: ");
             if (choice == 6) break;
             if (choice < 1 || choice > 6) {
@@ -355,7 +358,8 @@ public class Main {
                         String name = getStringInput("Введите имя: ", false);
                         String phone = getStringInput("Введите телефон: ", true);
                         String email = getStringInput("Введите email: ", true);
-                        Client client = new Client(null, name, phone.isEmpty() ? null : phone, email.isEmpty() ? null : email);
+                        Client client = new Client(null, name, phone.isEmpty() ? null : phone,
+                                email.isEmpty() ? null : email);
                         clientService.createClient(client);
                         System.out.println("Клиент создан с ID: " + client.getId());
                     }
@@ -390,7 +394,8 @@ public class Main {
                         String name = getStringInput("Введите новое имя: ", false);
                         String phone = getStringInput("Введите новый телефон: ", true);
                         String email = getStringInput("Введите новый email: ", true);
-                        Client client = new Client(id, name, phone.isEmpty() ? null : phone, email.isEmpty() ? null : email);
+                        Client client = new Client(id, name, phone.isEmpty() ? null : phone,
+                                email.isEmpty() ? null : email);
                         clientService.updateClient(client);
                         System.out.println("Клиент обновлён");
                     }
@@ -413,19 +418,10 @@ public class Main {
 
     /**
      * Управляет операциями с автомобилями.
-     *
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    private static void manageVehicles() throws SQLException {
+    private static void manageVehicles() {
         while (true) {
-            System.out.println("\n=== Автомобили ===");
-            System.out.println("1. Создать");
-            System.out.println("2. Просмотреть");
-            System.out.println("3. Список");
-            System.out.println("4. Обновить");
-            System.out.println("5. Удалить");
-            System.out.println("6. Назад");
-
+            displaySubMenu("Автомобили");
             int choice = getIntInput("Выберите опцию: ");
             if (choice == 6) break;
             if (choice < 1 || choice > 6) {
@@ -437,10 +433,12 @@ public class Main {
                 switch (choice) {
                     case 1 -> {
                         long clientId = getLongInput("Введите ID клиента: ");
+                        Client client = clientService.getClient(clientId);
                         String licensePlate = getStringInput("Введите рег. номер: ", false);
                         String brand = getStringInput("Введите марку: ", true);
                         String model = getStringInput("Введите модель: ", true);
-                        Vehicle vehicle = new Vehicle(null, clientId, licensePlate, brand.isEmpty() ? null : brand, model.isEmpty() ? null : model);
+                        Vehicle vehicle = new Vehicle(null, client, licensePlate,
+                                brand.isEmpty() ? null : brand, model.isEmpty() ? null : model);
                         vehicleService.createVehicle(vehicle);
                         System.out.println("Автомобиль создан с ID: " + vehicle.getId());
                     }
@@ -452,7 +450,7 @@ public class Main {
                         System.out.println("Рег. номер: " + vehicle.getLicensePlate());
                         System.out.println("Марка: " + (vehicle.getBrand() != null ? vehicle.getBrand() : "N/A"));
                         System.out.println("Модель: " + (vehicle.getModel() != null ? vehicle.getModel() : "N/A"));
-                        System.out.println("ID клиента: " + vehicle.getClientId());
+                        System.out.println("ID клиента: " + vehicle.getClient().getId());
                     }
                     case 3 -> {
                         List<Vehicle> vehicles = vehicleService.getAllVehicles();
@@ -468,17 +466,19 @@ public class Main {
                                         shorten(vehicle.getLicensePlate(), 10),
                                         shorten(vehicle.getBrand() != null ? vehicle.getBrand() : "N/A", 7),
                                         shorten(vehicle.getModel() != null ? vehicle.getModel() : "N/A", 7),
-                                        vehicle.getClientId());
+                                        vehicle.getClient().getId());
                             }
                         }
                     }
                     case 4 -> {
                         long id = getLongInput("Введите ID автомобиля: ");
                         long clientId = getLongInput("Введите новый ID клиента: ");
+                        Client client = clientService.getClient(clientId);
                         String licensePlate = getStringInput("Введите новый рег. номер: ", false);
                         String brand = getStringInput("Введите новую марку: ", true);
                         String model = getStringInput("Введите новую модель: ", true);
-                        Vehicle vehicle = new Vehicle(id, clientId, licensePlate, brand.isEmpty() ? null : brand, model.isEmpty() ? null : model);
+                        Vehicle vehicle = new Vehicle(id, client, licensePlate,
+                                brand.isEmpty() ? null : brand, model.isEmpty() ? null : model);
                         vehicleService.updateVehicle(vehicle);
                         System.out.println("Автомобиль обновлён");
                     }
@@ -501,19 +501,10 @@ public class Main {
 
     /**
      * Управляет операциями с записями о парковке.
-     *
-     * @throws SQLException при ошибке доступа к базе данных
      */
-    private static void manageParkingRecords() throws SQLException {
+    private static void manageParkingRecords() {
         while (true) {
-            System.out.println("\n=== Записи о парковке ===");
-            System.out.println("1. Создать");
-            System.out.println("2. Просмотреть");
-            System.out.println("3. Список");
-            System.out.println("4. Обновить");
-            System.out.println("5. Удалить");
-            System.out.println("6. Назад");
-
+            displaySubMenu("Записи о парковке");
             int choice = getIntInput("Выберите опцию: ");
             if (choice == 6) break;
             if (choice < 1 || choice > 6) {
@@ -525,29 +516,32 @@ public class Main {
                 switch (choice) {
                     case 1 -> {
                         long spaceId = getLongInput("Введите ID парковочного места: ");
+                        ParkingSpace space = parkingSpaceService.getParkingSpace(spaceId);
                         long vehicleId = getLongInput("Введите ID автомобиля: ");
+                        Vehicle vehicle = vehicleService.getVehicle(vehicleId);
                         long clientId = getLongInput("Введите ID клиента: ");
+                        Client client = clientService.getClient(clientId);
                         LocalDateTime entryTime = getDateTimeInput("Введите время въезда (гггг-мм-дд чч:мм:сс): ");
                         if (entryTime == null) continue;
-                        ParkingRecord record = new ParkingRecord(null, spaceId, vehicleId, clientId, entryTime, null);
+                        ParkingRecord record = new ParkingRecord(null, space, vehicle, client, entryTime, null);
                         parkingRecordService.createParkingRecord(record);
-                        System.out.println("Запись о парковке создана с ID: " + record.getId());
+                        System.out.println("Запись создана с ID: " + record.getId());
                     }
                     case 2 -> {
-                        long id = getLongInput("Введите ID записи о парковке: ");
+                        long id = getLongInput("Введите ID записи: ");
                         ParkingRecord record = parkingRecordService.getParkingRecord(id);
                         System.out.println("\nЗапись о парковке:");
                         System.out.println("ID: " + record.getId());
-                        System.out.println("ID места: " + record.getParkingSpaceId());
-                        System.out.println("ID автомобиля: " + record.getVehicleId());
-                        System.out.println("ID клиента: " + record.getClientId());
+                        System.out.println("ID места: " + record.getParkingSpace().getId());
+                        System.out.println("ID автомобиля: " + record.getVehicle().getId());
+                        System.out.println("ID клиента: " + record.getClient().getId());
                         System.out.println("Время въезда: " + record.getEntryTime());
                         System.out.println("Время выезда: " + (record.getExitTime() != null ? record.getExitTime() : "N/A"));
                     }
                     case 3 -> {
                         List<ParkingRecord> records = parkingRecordService.getAllParkingRecords();
                         if (records.isEmpty()) {
-                            System.out.println("Записи о парковке отсутствуют.");
+                            System.out.println("Записи отсутствуют.");
                         } else {
                             System.out.println("\nСписок записей о парковке:");
                             System.out.println("ID | Место | Авто | Клиент | Время въезда        | Время выезда");
@@ -555,19 +549,22 @@ public class Main {
                             for (ParkingRecord record : records) {
                                 System.out.printf("%d | %d | %d | %d | %-19s | %-19s%n",
                                         record.getId(),
-                                        record.getParkingSpaceId(),
-                                        record.getVehicleId(),
-                                        record.getClientId(),
+                                        record.getParkingSpace().getId(),
+                                        record.getVehicle().getId(),
+                                        record.getClient().getId(),
                                         record.getEntryTime(),
                                         record.getExitTime() != null ? record.getExitTime() : "N/A");
                             }
                         }
                     }
                     case 4 -> {
-                        long id = getLongInput("Введите ID записи о парковке: ");
-                        long spaceId = getLongInput("Введите новый ID парковочного места: ");
+                        long id = getLongInput("Введите ID записи: ");
+                        long spaceId = getLongInput("Введите новый ID места: ");
+                        ParkingSpace space = parkingSpaceService.getParkingSpace(spaceId);
                         long vehicleId = getLongInput("Введите новый ID автомобиля: ");
+                        Vehicle vehicle = vehicleService.getVehicle(vehicleId);
                         long clientId = getLongInput("Введите новый ID клиента: ");
+                        Client client = clientService.getClient(clientId);
                         LocalDateTime entryTime = getDateTimeInput("Введите новое время въезда (гггг-мм-дд чч:мм:сс): ");
                         if (entryTime == null) continue;
                         LocalDateTime exitTime = null;
@@ -579,16 +576,16 @@ public class Main {
                                 System.out.println("Ошибка: неверный формат времени, будет null");
                             }
                         }
-                        ParkingRecord record = new ParkingRecord(id, spaceId, vehicleId, clientId, entryTime, exitTime);
+                        ParkingRecord record = new ParkingRecord(id, space, vehicle, client, entryTime, exitTime);
                         parkingRecordService.updateParkingRecord(record);
-                        System.out.println("Запись о парковке обновлена");
+                        System.out.println("Запись обновлена");
                     }
                     case 5 -> {
-                        long id = getLongInput("Введите ID записи о парковке: ");
+                        long id = getLongInput("Введите ID записи: ");
                         String confirm = getStringInput("Подтвердите удаление (да/нет): ", false);
                         if (confirm.equalsIgnoreCase("да")) {
                             parkingRecordService.deleteParkingRecord(id);
-                            System.out.println("Запись о парковке удалена");
+                            System.out.println("Запись удалена");
                         } else {
                             System.out.println("Удаление отменено");
                         }
@@ -601,15 +598,17 @@ public class Main {
     }
 
     /**
-     * Обрезает строку до указанной длины.
+     * Отображает подменю для управления сущностями.
      *
-     * @param str       строка
-     * @param maxLength максимальная длина
-     * @return обрезанная строка
+     * @param entityName название сущности
      */
-    private static String shorten(String str, int maxLength) {
-        if (str == null) return "N/A";
-        if (str.length() <= maxLength) return str;
-        return str.substring(0, maxLength - 3) + "...";
+    private static void displaySubMenu(String entityName) {
+        System.out.println("\n=== " + entityName + " ===");
+        System.out.println("1. Создать");
+        System.out.println("2. Просмотреть");
+        System.out.println("3. Список");
+        System.out.println("4. Обновить");
+        System.out.println("5. Удалить");
+        System.out.println("6. Назад");
     }
 }
