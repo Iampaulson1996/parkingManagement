@@ -19,7 +19,7 @@ public class ParkingLotDao {
 
     /**
      * Создаёт новую парковку в базе данных.
-     *
+
      * @param parkingLot парковка для создания
      * @throws PersistenceException при ошибке сохранения
      */
@@ -36,7 +36,7 @@ public class ParkingLotDao {
 
     /**
      * Находит парковку по идентификатору.
-     *
+
      * @param id идентификатор парковки
      * @return парковка или null, если не найдена
      */
@@ -46,7 +46,7 @@ public class ParkingLotDao {
 
     /**
      * Возвращает список всех парковок.
-     *
+
      * @return список парковок
      */
     public List<ParkingLot> findAll() {
@@ -56,7 +56,7 @@ public class ParkingLotDao {
 
     /**
      * Обновляет парковку в базе данных.
-     *
+
      * @param parkingLot парковка для обновления
      * @return true, если обновление успешно, false, если парковка не существует
      * @throws PersistenceException при ошибке обновления
@@ -80,7 +80,7 @@ public class ParkingLotDao {
 
     /**
      * Удаляет парковку по идентификатору.
-     *
+
      * @param id идентификатор парковки
      * @return true, если удаление успешно, false, если парковка не существует
      * @throws PersistenceException при ошибке удаления

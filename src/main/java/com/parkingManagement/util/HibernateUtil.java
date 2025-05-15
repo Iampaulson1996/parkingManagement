@@ -20,7 +20,7 @@ public class HibernateUtil {
 
     /**
      * Возвращает EntityManagerFactory для работы с Hibernate.
-     *
+
      * @return EntityManagerFactory
      */
     public static EntityManagerFactory getEntityManagerFactory() {

@@ -17,7 +17,7 @@ public class ClientService {
 
     /**
      * Создаёт нового клиента с проверкой данных.
-     *
+
      * @param client клиент для создания
      * @throws IllegalArgumentException при некорректных данных
      */
@@ -28,7 +28,7 @@ public class ClientService {
 
     /**
      * Находит клиента по идентификатору.
-     *
+
      * @param id идентификатор клиента
      * @return клиент
      * @throws IllegalArgumentException если клиент не найден
@@ -44,7 +44,7 @@ public class ClientService {
 
     /**
      * Возвращает список всех клиентов.
-     *
+
      * @return список клиентов
      */
     public List<Client> getAllClients() {
@@ -53,7 +53,7 @@ public class ClientService {
 
     /**
      * Обновляет клиента.
-     *
+
      * @param client клиент для обновления
      * @throws IllegalArgumentException если клиент не найден
      */
@@ -66,7 +66,7 @@ public class ClientService {
 
     /**
      * Удаляет клиента по идентификатору.
-     *
+
      * @param id идентификатор клиента
      * @throws IllegalArgumentException если клиент не найден
      */
@@ -79,7 +79,7 @@ public class ClientService {
 
     /**
      * Проверяет корректность данных клиента.
-     *
+
      * @param client клиент для проверки
      * @param isUpdate флаг, указывающий, является ли операция обновлением
      * @throws IllegalArgumentException при некорректных данных
@@ -98,7 +98,7 @@ public class ClientService {
 
     /**
      * Проверяет корректность идентификатора.
-     *
+
      * @param id      идентификатор
      * @param field   название поля для сообщения об ошибке
      * @throws IllegalArgumentException при некорректном идентификаторе

@@ -17,7 +17,7 @@ public class VehicleService {
 
     /**
      * Создаёт новый автомобиль с проверкой данных.
-     *
+
      * @param vehicle автомобиль для создания
      * @throws IllegalArgumentException при некорректных данных
      */
@@ -28,7 +28,7 @@ public class VehicleService {
 
     /**
      * Находит автомобиль по идентификатору.
-     *
+
      * @param id идентификатор автомобиля
      * @return автомобиль
      * @throws IllegalArgumentException если автомобиль не найден
@@ -44,7 +44,7 @@ public class VehicleService {
 
     /**
      * Возвращает список всех автомобилей.
-     *
+
      * @return список автомобилей
      */
     public List<Vehicle> getAllVehicles() {
@@ -53,7 +53,7 @@ public class VehicleService {
 
     /**
      * Обновляет автомобиль.
-     *
+
      * @param vehicle автомобиль для обновления
      * @throws IllegalArgumentException если автомобиль не найден
      */
@@ -66,7 +66,7 @@ public class VehicleService {
 
     /**
      * Удаляет автомобиль по идентификатору.
-     *
+
      * @param id идентификатор автомобиля
      * @throws IllegalArgumentException если автомобиль не найден
      */
@@ -79,7 +79,7 @@ public class VehicleService {
 
     /**
      * Проверяет корректность данных автомобиля.
-     *
+
      * @param vehicle  автомобиль для проверки
      * @param isUpdate флаг, указывающий, является ли операция обновлением
      * @throws IllegalArgumentException при некорректных данных
@@ -102,7 +102,7 @@ public class VehicleService {
 
     /**
      * Проверяет корректность идентификатора.
-     *
+
      * @param id      идентификатор
      * @param field   название поля для сообщения об ошибке
      * @throws IllegalArgumentException при некорректном идентификаторе

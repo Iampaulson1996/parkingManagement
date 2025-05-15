@@ -6,11 +6,11 @@
     <persistence-unit name="parkingPU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <!-- Сущности для маппинга на таблицы базы данных -->
-        <class>com.parking.model.Client</class>
-        <class>com.parking.model.ParkingLot</class>
-        <class>com.parking.model.ParkingSpace</class>
-        <class>com.parking.model.Vehicle</class>
-        <class>com.parking.model.ParkingRecord</class>
+        <class>com.parkingManagement.model.Client</class>
+        <class>com.parkingManagement.model.ParkingLot</class>
+        <class>com.parkingManagement.model.ParkingSpace</class>
+        <class>com.parkingManagement.model.Vehicle</class>
+        <class>com.parkingManagement.model.ParkingRecord</class>
         <properties>
             <!-- Параметры подключения к PostgreSQL -->
             <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/parking"/>
