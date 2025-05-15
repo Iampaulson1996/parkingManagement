@@ -17,7 +17,7 @@ public class ParkingRecordService {
 
     /**
      * Создаёт новую запись о парковке с проверкой данных.
-     *
+
      * @param record запись о парковке для создания
      * @throws IllegalArgumentException при некорректных данных
      */
@@ -28,7 +28,7 @@ public class ParkingRecordService {
 
     /**
      * Находит запись о парковке по идентификатору.
-     *
+
      * @param id идентификатор записи
      * @return запись о парковке
      * @throws IllegalArgumentException если запись не найдена
@@ -44,7 +44,7 @@ public class ParkingRecordService {
 
     /**
      * Возвращает список всех записей о парковке.
-     *
+
      * @return список записей о парковке
      */
     public List<ParkingRecord> getAllParkingRecords() {
@@ -53,7 +53,7 @@ public class ParkingRecordService {
 
     /**
      * Обновляет запись о парковке.
-     *
+
      * @param record запись о парковке для обновления
      * @throws IllegalArgumentException если запись не найдена
      */
@@ -66,7 +66,7 @@ public class ParkingRecordService {
 
     /**
      * Удаляет запись о парковке по идентификатору.
-     *
+
      * @param id идентификатор записи
      * @throws IllegalArgumentException если запись не найдена
      */
@@ -79,7 +79,7 @@ public class ParkingRecordService {
 
     /**
      * Проверяет корректность данных записи о парковке.
-     *
+
      * @param record   запись для проверки
      * @param isUpdate флаг, указывающий, является ли операция обновлением
      * @throws IllegalArgumentException при некорректных данных
@@ -110,7 +110,7 @@ public class ParkingRecordService {
 
     /**
      * Проверяет корректность идентификатора.
-     *
+
      * @param id      идентификатор
      * @param field   название поля для сообщения об ошибке
      * @throws IllegalArgumentException при некорректном идентификаторе

@@ -1,6 +1,13 @@
 package com.parkingManagement.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,10 +30,10 @@ public class Client {
     @Column(name = "email", unique = true, length = 100)
     private String email;
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vehicle> vehicles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ParkingRecord> parkingRecords = new ArrayList<>();
 
     /**
@@ -37,7 +44,7 @@ public class Client {
 
     /**
      * Конструктор для создания клиента.
-     *
+
      * @param id    идентификатор клиента
      * @param name  имя клиента
      * @param phone телефон клиента

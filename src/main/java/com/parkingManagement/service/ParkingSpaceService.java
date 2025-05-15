@@ -19,7 +19,7 @@ public class ParkingSpaceService {
 
     /**
      * Создаёт новое парковочное место с проверкой данных.
-     *
+
      * @param parkingSpace парковочное место для создания
      * @throws IllegalArgumentException при некорректных данных
      */
@@ -30,7 +30,7 @@ public class ParkingSpaceService {
 
     /**
      * Находит парковочное место по идентификатору.
-     *
+
      * @param id идентификатор парковочного места
      * @return парковочное место
      * @throws IllegalArgumentException если место не найдено
@@ -46,7 +46,7 @@ public class ParkingSpaceService {
 
     /**
      * Возвращает список всех парковочных мест.
-     *
+
      * @return список парковочных мест
      */
     public List<ParkingSpace> getAllParkingSpaces() {
@@ -55,7 +55,7 @@ public class ParkingSpaceService {
 
     /**
      * Обновляет парковочное место.
-     *
+
      * @param parkingSpace парковочное место для обновления
      * @throws IllegalArgumentException если место не найдено
      */
@@ -68,7 +68,7 @@ public class ParkingSpaceService {
 
     /**
      * Удаляет парковочное место по идентификатору.
-     *
+
      * @param id идентификатор парковочного места
      * @throws IllegalArgumentException если место не найдено
      */
@@ -81,7 +81,7 @@ public class ParkingSpaceService {
 
     /**
      * Проверяет корректность данных парковочного места.
-     *
+
      * @param parkingSpace парковочное место для проверки
      * @param isUpdate     флаг, указывающий, является ли операция обновлением
      * @throws IllegalArgumentException при некорректных данных
@@ -110,7 +110,7 @@ public class ParkingSpaceService {
 
     /**
      * Проверяет корректность идентификатора.
-     *
+
      * @param id      идентификатор
      * @param field   название поля для сообщения об ошибке
      * @throws IllegalArgumentException при некорректном идентификаторе

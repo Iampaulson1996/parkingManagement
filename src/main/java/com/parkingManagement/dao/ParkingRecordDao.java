@@ -15,7 +15,7 @@ public class ParkingRecordDao {
 
     /**
      * Создаёт новый ParkingRecordDao с указанным EntityManager.
-     *
+
      * @param em менеджер сущностей Hibernate
      */
     public ParkingRecordDao(EntityManager em) {
@@ -24,7 +24,7 @@ public class ParkingRecordDao {
 
     /**
      * Создаёт новую запись о парковке в базе данных.
-     *
+
      * @param record запись о парковке для создания
      * @throws PersistenceException при ошибке сохранения
      */
@@ -41,7 +41,7 @@ public class ParkingRecordDao {
 
     /**
      * Находит запись о парковке по идентификатору.
-     *
+
      * @param id идентификатор записи
      * @return запись о парковке или null, если не найдена
      */
@@ -51,7 +51,7 @@ public class ParkingRecordDao {
 
     /**
      * Возвращает список всех записей о парковке.
-     *
+
      * @return список записей о парковке
      */
     public List<ParkingRecord> findAll() {
@@ -61,7 +61,7 @@ public class ParkingRecordDao {
 
     /**
      * Обновляет запись о парковке в базе данных.
-     *
+
      * @param record запись о парковке для обновления
      * @return true, если обновление успешно, false, если запись не существует
      * @throws PersistenceException при ошибке обновления
@@ -85,7 +85,7 @@ public class ParkingRecordDao {
 
     /**
      * Удаляет запись о парковке по идентификатору.
-     *
+
      * @param id идентификатор записи
      * @return true, если удаление успешно, false, если запись не существует
      * @throws PersistenceException при ошибке удаления

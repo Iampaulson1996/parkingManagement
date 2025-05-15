@@ -15,7 +15,7 @@ public class VehicleDao {
 
     /**
      * Создаёт новый VehicleDao с указанным EntityManager.
-     *
+
      * @param em менеджер сущностей Hibernate
      */
     public VehicleDao(EntityManager em) {
@@ -24,7 +24,7 @@ public class VehicleDao {
 
     /**
      * Создаёт новый автомобиль в базе данных.
-     *
+
      * @param vehicle автомобиль для создания
      * @throws PersistenceException при ошибке сохранения
      */
@@ -41,7 +41,7 @@ public class VehicleDao {
 
     /**
      * Находит автомобиль по идентификатору.
-     *
+
      * @param id идентификатор автомобиля
      * @return автомобиль или null, если не найден
      */
@@ -51,7 +51,7 @@ public class VehicleDao {
 
     /**
      * Возвращает список всех автомобилей.
-     *
+
      * @return список автомобилей
      */
     public List<Vehicle> findAll() {
@@ -61,7 +61,7 @@ public class VehicleDao {
 
     /**
      * Обновляет автомобиль в базе данных.
-     *
+
      * @param vehicle автомобиль для обновления
      * @return true, если обновление успешно, false, если автомобиль не существует
      * @throws PersistenceException при ошибке обновления
@@ -85,7 +85,7 @@ public class VehicleDao {
 
     /**
      * Удаляет автомобиль по идентификатору.
-     *
+
      * @param id идентификатор автомобиля
      * @return true, если удаление успешно, false, если автомобиль не существует
      * @throws PersistenceException при ошибке удаления

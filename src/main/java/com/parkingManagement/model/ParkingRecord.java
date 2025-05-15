@@ -1,6 +1,13 @@
 package com.parkingManagement.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 
 /**
@@ -13,15 +20,15 @@ public class ParkingRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "parking_space_id", nullable = false)
     private ParkingSpace parkingSpace;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
@@ -39,7 +46,7 @@ public class ParkingRecord {
 
     /**
      * Конструктор для создания записи о парковке.
-     *
+
      * @param id            идентификатор записи
      * @param parkingSpace  парковочное место
      * @param vehicle       автомобиль

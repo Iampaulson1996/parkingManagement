@@ -1,6 +1,15 @@
 package com.parkingManagement.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +23,7 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
@@ -27,7 +36,7 @@ public class Vehicle {
     @Column(name = "model", length = 50)
     private String model;
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ParkingRecord> parkingRecords = new ArrayList<>();
 
     /**
@@ -38,7 +47,7 @@ public class Vehicle {
 
     /**
      * Конструктор для создания автомобиля.
-     *
+
      * @param id           идентификатор автомобиля
      * @param client       клиент, владеющий автомобилем
      * @param licensePlate регистрационный номер

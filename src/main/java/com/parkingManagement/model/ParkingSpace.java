@@ -1,6 +1,15 @@
 package com.parkingManagement.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +23,7 @@ public class ParkingSpace {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "parking_lot_id", nullable = false)
     private ParkingLot parkingLot;
 
@@ -24,7 +33,7 @@ public class ParkingSpace {
     @Column(name = "type", nullable = false, length = 20)
     private String type;
 
-    @OneToMany(mappedBy = "parkingSpace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parkingSpace", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ParkingRecord> parkingRecords = new ArrayList<>();
 
     /**
@@ -35,7 +44,7 @@ public class ParkingSpace {
 
     /**
      * Конструктор для создания парковочного места.
-     *
+
      * @param id          идентификатор парковочного места
      * @param parkingLot  парковка, к которой относится место
      * @param spaceNumber номер парковочного места

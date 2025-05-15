@@ -17,7 +17,7 @@ public class ParkingLotService {
 
     /**
      * Создаёт новую парковку с проверкой данных.
-     *
+
      * @param parkingLot парковка для создания
      * @throws IllegalArgumentException при некорректных данных
      */
@@ -28,7 +28,7 @@ public class ParkingLotService {
 
     /**
      * Находит парковку по идентификатору.
-     *
+
      * @param id идентификатор парковки
      * @return парковка
      * @throws IllegalArgumentException если парковка не найдена
@@ -44,7 +44,7 @@ public class ParkingLotService {
 
     /**
      * Возвращает список всех парковок.
-     *
+
      * @return список парковок
      */
     public List<ParkingLot> getAllParkingLots() {
@@ -53,7 +53,7 @@ public class ParkingLotService {
 
     /**
      * Обновляет парковку.
-     *
+
      * @param parkingLot парковка для обновления
      * @throws IllegalArgumentException если парковка не найдена
      */
@@ -66,7 +66,7 @@ public class ParkingLotService {
 
     /**
      * Удаляет парковку по идентификатору.
-     *
+
      * @param id идентификатор парковки
      * @throws IllegalArgumentException если парковка не найдена
      */
@@ -79,7 +79,7 @@ public class ParkingLotService {
 
     /**
      * Проверяет корректность данных парковки.
-     *
+
      * @param parkingLot парковка для проверки
      * @param isUpdate   флаг, указывающий, является ли операция обновлением
      * @throws IllegalArgumentException при некорректных данных
@@ -104,7 +104,7 @@ public class ParkingLotService {
 
     /**
      * Проверяет корректность идентификатора.
-     *
+
      * @param id      идентификатор
      * @param field   название поля для сообщения об ошибке
      * @throws IllegalArgumentException при некорректном идентификаторе

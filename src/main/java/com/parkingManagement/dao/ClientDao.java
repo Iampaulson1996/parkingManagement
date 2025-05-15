@@ -19,7 +19,7 @@ public class ClientDao {
 
     /**
      * Создаёт нового клиента в базе данных.
-     *
+
      * @param client клиент для создания
      * @throws PersistenceException при ошибке сохранения
      */
@@ -36,7 +36,7 @@ public class ClientDao {
 
     /**
      * Находит клиента по идентификатору.
-     *
+
      * @param id идентификатор клиента
      * @return клиент или null, если не найден
      */
@@ -46,7 +46,7 @@ public class ClientDao {
 
     /**
      * Возвращает список всех клиентов.
-     *
+
      * @return список клиентов
      */
     public List<Client> findAll() {
@@ -56,7 +56,7 @@ public class ClientDao {
 
     /**
      * Обновляет клиента в базе данных.
-     *
+
      * @param client клиент для обновления
      * @return true, если обновление успешно, false, если клиент не существует
      * @throws PersistenceException при ошибке обновления
@@ -80,7 +80,7 @@ public class ClientDao {
 
     /**
      * Удаляет клиента по идентификатору.
-     *
+
      * @param id идентификатор клиента
      * @return true, если удаление успешно, false, если клиент не существует
      * @throws PersistenceException при ошибке удаления

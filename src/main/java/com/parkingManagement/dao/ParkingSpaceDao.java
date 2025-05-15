@@ -15,7 +15,7 @@ public class ParkingSpaceDao {
 
     /**
      * Создаёт новый ParkingSpaceDao с указанным EntityManager.
-     *
+
      * @param em менеджер сущностей Hibernate
      */
     public ParkingSpaceDao(EntityManager em) {
@@ -24,7 +24,7 @@ public class ParkingSpaceDao {
 
     /**
      * Создаёт новое парковочное место в базе данных.
-     *
+
      * @param parkingSpace парковочное место для создания
      * @throws PersistenceException при ошибке сохранения
      */
@@ -41,7 +41,7 @@ public class ParkingSpaceDao {
 
     /**
      * Находит парковочное место по идентификатору.
-     *
+
      * @param id идентификатор парковочного места
      * @return парковочное место или null, если не найдено
      */
@@ -51,7 +51,7 @@ public class ParkingSpaceDao {
 
     /**
      * Возвращает список всех парковочных мест.
-     *
+
      * @return список парковочных мест
      */
     public List<ParkingSpace> findAll() {
@@ -61,7 +61,7 @@ public class ParkingSpaceDao {
 
     /**
      * Обновляет парковочное место в базе данных.
-     *
+
      * @param parkingSpace парковочное место для обновления
      * @return true, если обновление успешно, false, если место не существует
      * @throws PersistenceException при ошибке обновления
@@ -85,7 +85,7 @@ public class ParkingSpaceDao {
 
     /**
      * Удаляет парковочное место по идентификатору.
-     *
+
      * @param id идентификатор парковочного места
      * @return true, если удаление успешно, false, если место не существует
      * @throws PersistenceException при ошибке удаления
