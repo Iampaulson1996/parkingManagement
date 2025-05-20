@@ -8,6 +8,7 @@ import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -58,13 +59,16 @@ class ParkingLotServiceTest {
         em.getTransaction().commit();
     }
 
-    /**
-     * Тестирует создание новой парковки с корректными данными.
-     */
+    @DisplayName("Создание новой парковки с корректными данными")
     @Test
     void testCreateParkingLotSuccess() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(null, "Центральная парковка", "ул. Главная, 123", 100);
+
+        // Действие
         parkingLotService.createParkingLot(lot);
+
+        // Проверка
         ParkingLot saved = parkingLotDao.findById(lot.getId());
         assertNotNull(saved, "Парковка должна быть сохранена");
         assertEquals("Центральная парковка", saved.getName(), "Название парковки должно совпадать");
@@ -72,49 +76,59 @@ class ParkingLotServiceTest {
         assertEquals(100, saved.getCapacity(), "Вместимость парковки должна совпадать");
     }
 
-    /**
-     * Тестирует создание парковки с некорректными данными (null название).
-     */
+    @DisplayName("Создание парковки с некорректными данными (null название)")
     @Test
     void testCreateParkingLotWithInvalidData() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(null, null, "ул. Главная, 123", 100);
+
+        // Действие
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> parkingLotService.createParkingLot(lot));
+
+        // Проверка
         assertEquals("Название парковки обязательно", exception.getMessage());
     }
 
-    /**
-     * Тестирует получение парковки по существующему идентификатору.
-     */
+    @DisplayName("Получение парковки по существующему идентификатору")
     @Test
     void testGetParkingLotSuccess() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(null, "Городская парковка", "ул. Дубовая, 456", 50);
         parkingLotDao.create(lot);
+
+        // Действие
         ParkingLot found = parkingLotService.getParkingLot(lot.getId());
+
+        // Проверка
         assertNotNull(found, "Парковка должна быть найдена");
         assertEquals(lot.getId(), found.getId(), "Идентификатор парковки должен совпадать");
     }
 
-    /**
-     * Тестирует получение парковки по несуществующему идентификатору.
-     */
+    @DisplayName("Получение парковки по несуществующему идентификатору")
     @Test
     void testGetParkingLotNotFound() {
+        // Действие
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> parkingLotService.getParkingLot(999L));
+
+        // Проверка
         assertEquals("Парковка с ID 999 не найдена", exception.getMessage());
     }
 
-    /**
-     * Тестирует получение списка всех парковок.
-     */
+    @DisplayName("Получение списка всех парковок")
     @Test
     void testGetAllParkingLots() {
+        // Подготовка
         ParkingLot lot1 = new ParkingLot(null, "Парковка 1", "ул. Сосновая, 111", 20);
         ParkingLot lot2 = new ParkingLot(null, "Парковка 2", "ул. Еловая, 222", 30);
         parkingLotDao.create(lot1);
         parkingLotDao.create(lot2);
+
+        // Действие
         List<ParkingLot> lots = parkingLotService.getAllParkingLots();
+
+        // Проверка
         assertEquals(2, lots.size(), "Должно быть найдено две парковки");
         assertTrue(lots.stream().anyMatch(l -> l.getName().equals("Парковка 1")),
                 "Список должен содержать Парковку 1");
@@ -122,50 +136,60 @@ class ParkingLotServiceTest {
                 "Список должен содержать Парковку 2");
     }
 
-    /**
-     * Тестирует обновление существующей парковки.
-     */
+    @DisplayName("Обновление существующей парковки")
     @Test
     void testUpdateParkingLotSuccess() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(null, "Старое название", "Старый адрес", 50);
         parkingLotDao.create(lot);
         ParkingLot updatedLot = new ParkingLot(lot.getId(), "Новое название", "Новый адрес", 75);
+
+        // Действие
         parkingLotService.updateParkingLot(updatedLot);
+
+        // Проверка
         ParkingLot saved = parkingLotDao.findById(lot.getId());
         assertEquals("Новое название", saved.getName(), "Название парковки должно быть обновлено");
         assertEquals("Новый адрес", saved.getAddress(), "Адрес парковки должен быть обновлён");
         assertEquals(75, saved.getCapacity(), "Вместимость парковки должна быть обновлена");
     }
 
-    /**
-     * Тестирует попытку обновления несуществующей парковки.
-     */
+    @DisplayName("Попытка обновления несуществующей парковки")
     @Test
     void testUpdateParkingLotNotFound() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(999L, "Несуществующая", "Нет адреса", 10);
+
+        // Действие
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> parkingLotService.updateParkingLot(lot));
+
+        // Проверка
         assertEquals("Парковка с ID 999 не найдена", exception.getMessage());
     }
 
-    /**
-     * Тестирует удаление существующей парковки.
-     */
+    @DisplayName("Удаление существующей парковки")
     @Test
     void testDeleteParkingLotSuccess() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(null, "Для удаления", "ул. Удаляемая, 123", 40);
         parkingLotDao.create(lot);
+
+        // Действие
         parkingLotService.deleteParkingLot(lot.getId());
+
+        // Проверка
         assertNull(parkingLotDao.findById(lot.getId()), "Парковка не должна быть найдена после удаления");
     }
 
-    /**
-     * Тестирует попытку удаления несуществующей парковки.
-     */
+    @DisplayName("Попытка удаления несуществующей парковки")
     @Test
     void testDeleteParkingLotNotFound() {
+        // Действие
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> parkingLotService.deleteParkingLot(999L));
+
+        // Проверка
         assertEquals("Парковка с ID 999 не найдена", exception.getMessage());
     }
 }

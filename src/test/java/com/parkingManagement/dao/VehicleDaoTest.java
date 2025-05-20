@@ -8,15 +8,16 @@ import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Класс для тестирования операций DAO для сущности Vehicle с использованием методологии AAA.
@@ -59,15 +60,18 @@ class VehicleDaoTest {
         em.getTransaction().commit();
     }
 
-    /**
-     * Тестирует создание нового автомобиля в базе данных.
-     */
+    @DisplayName("Создание нового автомобиля в базе данных")
     @Test
     void testCreateVehicle() {
-        Client client = new Client(null, "Иван Иванов", "1234567890", "ivan@example.com");
+        // Подготовка
+        Client client = new Client(null, "Иван Иванов", "+79123456789", "ivan@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(null, client, "АВС123", "Toyota", "Camry");
+
+        // Действие
         vehicleDao.create(vehicle);
+
+        // Проверка
         Vehicle saved = vehicleDao.findById(vehicle.getId());
         assertNotNull(saved, "Автомобиль должен быть сохранён");
         assertEquals("АВС123", saved.getLicensePlate(), "Регистрационный номер должен совпадать");
@@ -76,60 +80,74 @@ class VehicleDaoTest {
         assertEquals(client.getId(), saved.getClient().getId(), "Идентификатор клиента должен совпадать");
     }
 
-    /**
-     * Тестирует поиск автомобиля по существующему идентификатору.
-     */
+    @DisplayName("Поиск автомобиля по существующему идентификатору")
     @Test
     void testFindByIdWhenVehicleExists() {
-        Client client = new Client(null, "Анна Смирнова", "0987654321", "anna@example.com");
+        // Подготовка
+        Client client = new Client(null, "Анна Смирнова", "+79087654321", "anna@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(null, client, "XYZ789", "Honda", "Civic");
         vehicleDao.create(vehicle);
+
+        // Действие
         Vehicle found = vehicleDao.findById(vehicle.getId());
+
+        // Проверка
         assertNotNull(found, "Автомобиль должен быть найден");
         assertEquals(vehicle.getId(), found.getId(), "Идентификатор автомобиля должен совпадать");
     }
 
-    /**
-     * Тестирует поиск автомобиля по несуществующему идентификатору.
-     */
+    @DisplayName("Поиск автомобиля по несуществующему идентификатору")
     @Test
     void testFindByIdWhenVehicleNotExists() {
+        // Подготовка
         Long nonExistentId = 999L;
+
+        // Действие
         Vehicle found = vehicleDao.findById(nonExistentId);
+
+        // Проверка
         assertNull(found, "Автомобиль не должен быть найден");
     }
 
-    /**
-     * Тестирует получение списка всех автомобилей.
-     */
+    @DisplayName("Получение списка всех автомобилей")
     @Test
     void testFindAll() {
-        Client client = new Client(null, "Клиент Один", "111", "one@example.com");
+        // Подготовка
+        Client client = new Client(null, "Пётр Петров", "+79111111111", "petr@example.com");
         clientDao.create(client);
         Vehicle vehicle1 = new Vehicle(null, client, "DEF456", "Ford", "Focus");
         Vehicle vehicle2 = new Vehicle(null, client, "GHI789", "BMW", "X5");
         vehicleDao.create(vehicle1);
         vehicleDao.create(vehicle2);
+
+        // Действие
         List<Vehicle> vehicles = vehicleDao.findAll();
+
+        // Проверка
         assertEquals(2, vehicles.size(), "Должно быть найдено два автомобиля");
-        assertTrue(vehicles.stream().anyMatch(v -> v.getLicensePlate().equals("DEF456")), "Список должен содержать автомобиль DEF456");
-        assertTrue(vehicles.stream().anyMatch(v -> v.getLicensePlate().equals("GHI789")), "Список должен содержать автомобиль GHI789");
+        assertTrue(vehicles.stream().anyMatch(v -> v.getLicensePlate().equals("DEF456")),
+                "Список должен содержать автомобиль DEF456");
+        assertTrue(vehicles.stream().anyMatch(v -> v.getLicensePlate().equals("GHI789")),
+                "Список должен содержать автомобиль GHI789");
     }
 
-    /**
-     * Тестирует обновление существующего автомобиля.
-     */
+    @DisplayName("Обновление существующего автомобиля")
     @Test
     void testUpdateVehicle() {
-        Client client = new Client(null, "Старый клиент", "123", "old@example.com");
+        // Подготовка
+        Client client = new Client(null, "Старый клиент", "+79123456789", "old@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(null, client, "JKL012", "Nissan", "Altima");
         vehicleDao.create(vehicle);
-        Client newClient = new Client(null, "Новый клиент", "456", "new@example.com");
+        Client newClient = new Client(null, "Новый клиент", "+79987654321", "new@example.com");
         clientDao.create(newClient);
         Vehicle updatedVehicle = new Vehicle(vehicle.getId(), newClient, "MNO345", "Tesla", "Model 3");
+
+        // Действие
         boolean result = vehicleDao.update(updatedVehicle);
+
+        // Проверка
         assertTrue(result, "Обновление должно быть успешным");
         Vehicle saved = vehicleDao.findById(vehicle.getId());
         assertEquals("MNO345", saved.getLicensePlate(), "Регистрационный номер должен быть обновлён");
@@ -138,39 +156,48 @@ class VehicleDaoTest {
         assertEquals(newClient.getId(), saved.getClient().getId(), "Идентификатор клиента должен быть обновлён");
     }
 
-    /**
-     * Тестирует попытку обновления несуществующего автомобиля.
-     */
+    @DisplayName("Попытка обновления несуществующего автомобиля")
     @Test
     void testUpdateNonExistentVehicle() {
-        Client client = new Client(null, "Клиент", "123", "client@example.com");
+        // Подготовка
+        Client client = new Client(null, "Клиент", "+79123456789", "client@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(999L, client, "PQR678", "Kia", "Sportage");
+
+        // Действие
         boolean result = vehicleDao.update(vehicle);
+
+        // Проверка
         assertFalse(result, "Обновление несуществующего автомобиля должно вернуть false");
     }
 
-    /**
-     * Тестирует удаление существующего автомобиля.
-     */
+    @DisplayName("Удаление существующего автомобиля")
     @Test
     void testDeleteVehicle() {
-        Client client = new Client(null, "Для удаления", "123", "delete@example.com");
+        // Подготовка
+        Client client = new Client(null, "Для удаления", "+79123456789", "delete@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(null, client, "STU901", "Hyundai", "Tucson");
         vehicleDao.create(vehicle);
+
+        // Действие
         boolean result = vehicleDao.delete(vehicle.getId());
+
+        // Проверка
         assertTrue(result, "Удаление должно быть успешным");
         assertNull(vehicleDao.findById(vehicle.getId()), "Автомобиль не должен быть найден после удаления");
     }
 
-    /**
-     * Тестирует попытку удаления несуществующего автомобиля.
-     */
+    @DisplayName("Попытка удаления несуществующего автомобиля")
     @Test
     void testDeleteNonExistentVehicle() {
+        // Подготовка
         Long nonExistentId = 999L;
+
+        // Действие
         boolean result = vehicleDao.delete(nonExistentId);
+
+        // Проверка
         assertFalse(result, "Удаление несуществующего автомобиля должно вернуть false");
     }
 }

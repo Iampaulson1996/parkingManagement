@@ -7,6 +7,7 @@ import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -56,13 +57,16 @@ class ClientDaoTest {
         em.getTransaction().commit();
     }
 
-    /**
-     * Тестирует создание нового клиента в базе данных.
-     */
+    @DisplayName("Создание нового клиента")
     @Test
     void testCreateClient() {
+        // Подготовка
         Client client = new Client(null, "Иван Иванов", "+79123456789", "ivan@example.com");
+
+        // Действие
         clientDao.create(client);
+
+        // Проверка
         Client saved = clientDao.findById(client.getId());
         assertNotNull(saved, "Клиент должен быть сохранён");
         assertEquals("Иван Иванов", saved.getName(), "Имя клиента должно совпадать");
@@ -70,38 +74,47 @@ class ClientDaoTest {
         assertEquals("ivan@example.com", saved.getEmail(), "Email клиента должен совпадать");
     }
 
-    /**
-     * Тестирует поиск клиента по существующему идентификатору.
-     */
+    @DisplayName("Поиск клиента по существующему идентификатору")
     @Test
     void testFindByIdWhenClientExists() {
+        // Подготовка
         Client client = new Client(null, "Анна Смирнова", "+79087654321", "anna@example.com");
         clientDao.create(client);
+
+        // Действие
         Client found = clientDao.findById(client.getId());
+
+        // Проверка
         assertNotNull(found, "Клиент должен быть найден");
         assertEquals(client.getId(), found.getId(), "Идентификатор клиента должен совпадать");
     }
 
-    /**
-     * Тестирует поиск клиента по несуществующему идентификатору.
-     */
+    @DisplayName("Поиск клиента по несуществующему идентификатору")
     @Test
     void testFindByIdWhenClientNotExists() {
+        // Подготовка
         Long nonExistentId = 999L;
+
+        // Действие
         Client found = clientDao.findById(nonExistentId);
+
+        // Проверка
         assertNull(found, "Клиент не должен быть найден");
     }
 
-    /**
-     * Тестирует получение списка всех клиентов.
-     */
+    @DisplayName("Получение списка всех клиентов")
     @Test
     void testFindAll() {
+        // Подготовка
         Client client1 = new Client(null, "Пётр Петров", "+79111111111", "petr@example.com");
         Client client2 = new Client(null, "Мария Сидорова", "+79222222222", "maria@example.com");
         clientDao.create(client1);
         clientDao.create(client2);
+
+        // Действие
         List<Client> clients = clientDao.findAll();
+
+        // Проверка
         assertEquals(2, clients.size(), "Должно быть найдено два клиента");
         assertTrue(clients.stream().anyMatch(c -> c.getName().equals("Пётр Петров")),
                 "Список должен содержать Петра Петрова");
@@ -109,15 +122,18 @@ class ClientDaoTest {
                 "Список должен содержать Марию Сидорову");
     }
 
-    /**
-     * Тестирует обновление существующего клиента.
-     */
+    @DisplayName("Обновление существующего клиента")
     @Test
     void testUpdateClient() {
+        // Подготовка
         Client client = new Client(null, "Старое Имя", "+79123456789", "old@example.com");
         clientDao.create(client);
         Client updatedClient = new Client(client.getId(), "Новое Имя", "+79987654321", "new@example.com");
+
+        // Действие
         boolean result = clientDao.update(updatedClient);
+
+        // Проверка
         assertTrue(result, "Обновление должно быть успешным");
         Client saved = clientDao.findById(client.getId());
         assertEquals("Новое Имя", saved.getName(), "Имя клиента должно быть обновлено");
@@ -125,35 +141,44 @@ class ClientDaoTest {
         assertEquals("new@example.com", saved.getEmail(), "Email клиента должен быть обновлён");
     }
 
-    /**
-     * Тестирует попытку обновления несуществующего клиента.
-     */
+    @DisplayName("Попытка обновления несуществующего клиента")
     @Test
     void testUpdateNonExistentClient() {
+        // Подготовка
         Client client = new Client(999L, "Несуществующий", "+79123456789", "none@example.com");
+
+        // Действие
         boolean result = clientDao.update(client);
+
+        // Проверка
         assertFalse(result, "Обновление несуществующего клиента должно вернуть false");
     }
 
-    /**
-     * Тестирует удаление существующего клиента.
-     */
+    @DisplayName("Удаление существующего клиента")
     @Test
     void testDeleteClient() {
+        // Подготовка
         Client client = new Client(null, "Для Удаления", "+79123456789", "delete@example.com");
         clientDao.create(client);
+
+        // Действие
         boolean result = clientDao.delete(client.getId());
+
+        // Проверка
         assertTrue(result, "Удаление должно быть успешным");
         assertNull(clientDao.findById(client.getId()), "Клиент не должен быть найден после удаления");
     }
 
-    /**
-     * Тестирует попытку удаления несуществующего клиента.
-     */
+    @DisplayName("Попытка удаления несуществующего клиента")
     @Test
     void testDeleteNonExistentClient() {
+        // Подготовка
         Long nonExistentId = 999L;
+
+        // Действие
         boolean result = clientDao.delete(nonExistentId);
+
+        // Проверка
         assertFalse(result, "Удаление несуществующего клиента должно вернуть false");
     }
 }

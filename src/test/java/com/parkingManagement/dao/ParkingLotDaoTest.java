@@ -7,6 +7,7 @@ import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -55,13 +56,16 @@ class ParkingLotDaoTest {
         em.getTransaction().commit();
     }
 
-    /**
-     * Тестирует создание новой парковки в базе данных.
-     */
+    @DisplayName("Создание новой парковки")
     @Test
     void testCreateParkingLot() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(null, "Центральная парковка", "ул. Главная, 123", 100);
+
+        // Действие
         parkingLotDao.create(lot);
+
+        // Проверка
         ParkingLot saved = parkingLotDao.findById(lot.getId());
         assertNotNull(saved, "Парковка должна быть сохранена");
         assertEquals("Центральная парковка", saved.getName(), "Название парковки должно совпадать");
@@ -69,52 +73,64 @@ class ParkingLotDaoTest {
         assertEquals(100, saved.getCapacity(), "Вместимость парковки должна совпадать");
     }
 
-    /**
-     * Тестирует поиск парковки по существующему идентификатору.
-     */
+    @DisplayName("Поиск парковки по существующему идентификатору")
     @Test
     void testFindByIdWhenParkingLotExists() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(null, "Городская парковка", "ул. Дубовая, 456", 50);
         parkingLotDao.create(lot);
+
+        // Действие
         ParkingLot found = parkingLotDao.findById(lot.getId());
+
+        // Проверка
         assertNotNull(found, "Парковка должна быть найдена");
         assertEquals(lot.getId(), found.getId(), "Идентификатор парковки должен совпадать");
     }
 
-    /**
-     * Тестирует поиск парковки по несуществующему идентификатору.
-     */
+    @DisplayName("Поиск парковки по несуществующему идентификатору")
     @Test
     void testFindByIdWhenParkingLotNotExists() {
+        // Подготовка
         Long nonExistentId = 999L;
+
+        // Действие
         ParkingLot found = parkingLotDao.findById(nonExistentId);
+
+        // Проверка
         assertNull(found, "Парковка не должна быть найдена");
     }
 
-    /**
-     * Тестирует получение списка всех парковок.
-     */
+    @DisplayName("Получение списка всех парковок")
     @Test
     void testFindAll() {
+        // Подготовка
         ParkingLot lot1 = new ParkingLot(null, "Парковка 1", "ул. Сосновая, 111", 20);
         ParkingLot lot2 = new ParkingLot(null, "Парковка 2", "ул. Еловая, 222", 30);
         parkingLotDao.create(lot1);
         parkingLotDao.create(lot2);
+
+        // Действие
         List<ParkingLot> lots = parkingLotDao.findAll();
+
+        // Проверка
         assertEquals(2, lots.size(), "Должно быть найдено две парковки");
         assertTrue(lots.stream().anyMatch(l -> l.getName().equals("Парковка 1")), "Список должен содержать Парковку 1");
         assertTrue(lots.stream().anyMatch(l -> l.getName().equals("Парковка 2")), "Список должен содержать Парковку 2");
     }
 
-    /**
-     * Тестирует обновление существующей парковки.
-     */
+    @DisplayName("Обновление существующей парковки")
     @Test
     void testUpdateParkingLot() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(null, "Старое название", "Старый адрес", 50);
         parkingLotDao.create(lot);
         ParkingLot updatedLot = new ParkingLot(lot.getId(), "Новое название", "Новый адрес", 75);
+
+        // Действие
         boolean result = parkingLotDao.update(updatedLot);
+
+        // Проверка
         assertTrue(result, "Обновление должно быть успешным");
         ParkingLot saved = parkingLotDao.findById(lot.getId());
         assertEquals("Новое название", saved.getName(), "Название парковки должно быть обновлено");
@@ -122,35 +138,44 @@ class ParkingLotDaoTest {
         assertEquals(75, saved.getCapacity(), "Вместимость парковки должна быть обновлена");
     }
 
-    /**
-     * Тестирует попытку обновления несуществующей парковки.
-     */
+    @DisplayName("Попытка обновления несуществующей парковки")
     @Test
     void testUpdateNonExistentParkingLot() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(999L, "Несуществующая", "Нет адреса", 10);
+
+        // Действие
         boolean result = parkingLotDao.update(lot);
+
+        // Проверка
         assertFalse(result, "Обновление несуществующей парковки должно вернуть false");
     }
 
-    /**
-     * Тестирует удаление существующей парковки.
-     */
+    @DisplayName("Удаление существующей парковки")
     @Test
     void testDeleteParkingLot() {
+        // Подготовка
         ParkingLot lot = new ParkingLot(null, "Для удаления", "ул. Удаляемая, 123", 40);
         parkingLotDao.create(lot);
+
+        // Действие
         boolean result = parkingLotDao.delete(lot.getId());
+
+        // Проверка
         assertTrue(result, "Удаление должно быть успешным");
         assertNull(parkingLotDao.findById(lot.getId()), "Парковка не должна быть найдена после удаления");
     }
 
-    /**
-     * Тестирует попытку удаления несуществующей парковки.
-     */
+    @DisplayName("Попытка удаления несуществующей парковки")
     @Test
     void testDeleteNonExistentParkingLot() {
+        // Подготовка
         Long nonExistentId = 999L;
+
+        // Действие
         boolean result = parkingLotDao.delete(nonExistentId);
+
+        // Проверка
         assertFalse(result, "Удаление несуществующей парковки должно вернуть false");
     }
 }
