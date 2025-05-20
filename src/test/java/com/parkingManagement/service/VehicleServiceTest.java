@@ -10,6 +10,7 @@ import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -63,15 +64,18 @@ class VehicleServiceTest {
         em.getTransaction().commit();
     }
 
-    /**
-     * Тестирует создание нового автомобиля с корректными данными.
-     */
+    @DisplayName("Создание нового автомобиля с корректными данными")
     @Test
     void testCreateVehicleSuccess() {
+        // Подготовка
         Client client = new Client(null, "Иван Иванов", "+79123456789", "ivan@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(null, client, "АВС123", "Toyota", "Camry");
+
+        // Действие
         vehicleService.createVehicle(vehicle);
+
+        // Проверка
         Vehicle saved = vehicleDao.findById(vehicle.getId());
         assertNotNull(saved, "Автомобиль должен быть сохранён");
         assertEquals("АВС123", saved.getLicensePlate(), "Регистрационный номер должен совпадать");
@@ -80,55 +84,65 @@ class VehicleServiceTest {
         assertEquals(client.getId(), saved.getClient().getId(), "Идентификатор клиента должен совпадать");
     }
 
-    /**
-     * Тестирует создание автомобиля с некорректными данными (null номер).
-     */
+    @DisplayName("Создание автомобиля с некорректными данными (null номер)")
     @Test
     void testCreateVehicleWithInvalidData() {
+        // Подготовка
         Client client = new Client(null, "Иван Иванов", "+79123456789", "ivan@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(null, client, null, "Toyota", "Camry");
+
+        // Действие
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> vehicleService.createVehicle(vehicle));
+
+        // Проверка
         assertEquals("Регистрационный номер обязателен", exception.getMessage());
     }
 
-    /**
-     * Тестирует получение автомобиля по существующему идентификатору.
-     */
+    @DisplayName("Получение автомобиля по существующему идентификатору")
     @Test
     void testGetVehicleSuccess() {
+        // Подготовка
         Client client = new Client(null, "Анна Смирнова", "+79087654321", "anna@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(null, client, "XYZ789", "Honda", "Civic");
         vehicleDao.create(vehicle);
+
+        // Действие
         Vehicle found = vehicleService.getVehicle(vehicle.getId());
+
+        // Проверка
         assertNotNull(found, "Автомобиль должен быть найден");
         assertEquals(vehicle.getId(), found.getId(), "Идентификатор автомобиля должен совпадать");
     }
 
-    /**
-     * Тестирует получение автомобиля по несуществующему идентификатору.
-     */
+    @DisplayName("Получение автомобиля по несуществующему идентификатору")
     @Test
     void testGetVehicleNotFound() {
+        // Действие
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> vehicleService.getVehicle(999L));
+
+        // Проверка
         assertEquals("Автомобиль с ID 999 не найден", exception.getMessage());
     }
 
-    /**
-     * Тестирует получение списка всех автомобилей.
-     */
+    @DisplayName("Получение списка всех автомобилей")
     @Test
     void testGetAllVehicles() {
+        // Подготовка
         Client client = new Client(null, "Пётр Петров", "+79111111111", "petr@example.com");
         clientDao.create(client);
         Vehicle vehicle1 = new Vehicle(null, client, "DEF456", "Ford", "Focus");
         Vehicle vehicle2 = new Vehicle(null, client, "GHI789", "BMW", "X5");
         vehicleDao.create(vehicle1);
         vehicleDao.create(vehicle2);
+
+        // Действие
         List<Vehicle> vehicles = vehicleService.getAllVehicles();
+
+        // Проверка
         assertEquals(2, vehicles.size(), "Должно быть найдено два автомобиля");
         assertTrue(vehicles.stream().anyMatch(v -> v.getLicensePlate().equals("DEF456")),
                 "Список должен содержать автомобиль DEF456");
@@ -136,11 +150,10 @@ class VehicleServiceTest {
                 "Список должен содержать автомобиль GHI789");
     }
 
-    /**
-     * Тестирует обновление существующего автомобиля.
-     */
+    @DisplayName("Обновление существующего автомобиля")
     @Test
     void testUpdateVehicleSuccess() {
+        // Подготовка
         Client client = new Client(null, "Старый клиент", "+79123456789", "old@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(null, client, "JKL012", "Nissan", "Altima");
@@ -148,7 +161,11 @@ class VehicleServiceTest {
         Client newClient = new Client(null, "Новый клиент", "+79987654321", "new@example.com");
         clientDao.create(newClient);
         Vehicle updatedVehicle = new Vehicle(vehicle.getId(), newClient, "MNO345", "Tesla", "Model 3");
+
+        // Действие
         vehicleService.updateVehicle(updatedVehicle);
+
+        // Проверка
         Vehicle saved = vehicleDao.findById(vehicle.getId());
         assertEquals("MNO345", saved.getLicensePlate(), "Регистрационный номер должен быть обновлён");
         assertEquals("Tesla", saved.getBrand(), "Марка автомобиля должна быть обновлена");
@@ -156,39 +173,46 @@ class VehicleServiceTest {
         assertEquals(newClient.getId(), saved.getClient().getId(), "Идентификатор клиента должен быть обновлён");
     }
 
-    /**
-     * Тестирует попытку обновления несуществующего автомобиля.
-     */
+    @DisplayName("Попытка обновления несуществующего автомобиля")
     @Test
     void testUpdateVehicleNotFound() {
+        // Подготовка
         Client client = new Client(null, "Клиент", "+79123456789", "client@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(999L, client, "PQR678", "Kia", "Sportage");
+
+        // Действие
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> vehicleService.updateVehicle(vehicle));
+
+        // Проверка
         assertEquals("Автомобиль с ID 999 не найден", exception.getMessage());
     }
 
-    /**
-     * Тестирует удаление существующего автомобиля.
-     */
+    @DisplayName("Удаление существующего автомобиля")
     @Test
     void testDeleteVehicleSuccess() {
+        // Подготовка
         Client client = new Client(null, "Для удаления", "+79123456789", "delete@example.com");
         clientDao.create(client);
         Vehicle vehicle = new Vehicle(null, client, "STU901", "Hyundai", "Tucson");
         vehicleDao.create(vehicle);
+
+        // Действие
         vehicleService.deleteVehicle(vehicle.getId());
+
+        // Проверка
         assertNull(vehicleDao.findById(vehicle.getId()), "Автомобиль не должен быть найден после удаления");
     }
 
-    /**
-     * Тестирует попытку удаления несуществующего автомобиля.
-     */
+    @DisplayName("Попытка удаления несуществующего автомобиля")
     @Test
     void testDeleteVehicleNotFound() {
+        // Действие
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> vehicleService.deleteVehicle(999L));
+
+        // Проверка
         assertEquals("Автомобиль с ID 999 не найден", exception.getMessage());
     }
 }
