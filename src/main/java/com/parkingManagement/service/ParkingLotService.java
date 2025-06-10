@@ -2,22 +2,31 @@ package com.parkingManagement.service;
 
 import com.parkingManagement.dao.ParkingLotDao;
 import com.parkingManagement.model.ParkingLot;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Сервис для управления парковками в системе управления парковкой.
  */
+@Service
 public class ParkingLotService {
     private final ParkingLotDao parkingLotDao;
 
+    /**
+     * Конструктор сервиса парковок.
+     
+     * @param parkingLotDao DAO для доступа к данным парковок
+     */
+    @Autowired
     public ParkingLotService(ParkingLotDao parkingLotDao) {
         this.parkingLotDao = parkingLotDao;
     }
 
     /**
      * Создаёт новую парковку с проверкой данных.
-
+     
      * @param parkingLot парковка для создания
      * @throws IllegalArgumentException при некорректных данных
      */
@@ -28,7 +37,7 @@ public class ParkingLotService {
 
     /**
      * Находит парковку по идентификатору.
-
+     
      * @param id идентификатор парковки
      * @return парковка
      * @throws IllegalArgumentException если парковка не найдена
@@ -44,7 +53,7 @@ public class ParkingLotService {
 
     /**
      * Возвращает список всех парковок.
-
+     
      * @return список парковок
      */
     public List<ParkingLot> getAllParkingLots() {
@@ -52,8 +61,8 @@ public class ParkingLotService {
     }
 
     /**
-     * Обновляет парковку.
-
+     * Обновляет данные парковки.
+     
      * @param parkingLot парковка для обновления
      * @throws IllegalArgumentException если парковка не найдена
      */
@@ -66,7 +75,7 @@ public class ParkingLotService {
 
     /**
      * Удаляет парковку по идентификатору.
-
+     
      * @param id идентификатор парковки
      * @throws IllegalArgumentException если парковка не найдена
      */
@@ -79,9 +88,9 @@ public class ParkingLotService {
 
     /**
      * Проверяет корректность данных парковки.
-
+     
      * @param parkingLot парковка для проверки
-     * @param isUpdate   флаг, указывающий, является ли операция обновлением
+     * @param isUpdate флаг, указывающий, является ли операция обновлением
      * @throws IllegalArgumentException при некорректных данных
      */
     private void validateParkingLot(ParkingLot parkingLot, boolean isUpdate) {
@@ -104,9 +113,9 @@ public class ParkingLotService {
 
     /**
      * Проверяет корректность идентификатора.
-
-     * @param id      идентификатор
-     * @param field   название поля для сообщения об ошибке
+     
+     * @param id идентификатор
+     * @param field название поля для сообщения об ошибке
      * @throws IllegalArgumentException при некорректном идентификаторе
      */
     private void validateId(Long id, String field) {

@@ -2,22 +2,31 @@ package com.parkingManagement.service;
 
 import com.parkingManagement.dao.VehicleDao;
 import com.parkingManagement.model.Vehicle;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Сервис для управления автомобилями в системе управления парковкой.
  */
+@Service
 public class VehicleService {
     private final VehicleDao vehicleDao;
 
+    /**
+     * Конструктор сервиса автомобилей.
+     
+     * @param vehicleDao DAO для доступа к данным автомобилей
+     */
+    @Autowired
     public VehicleService(VehicleDao vehicleDao) {
         this.vehicleDao = vehicleDao;
     }
 
     /**
      * Создаёт новый автомобиль с проверкой данных.
-
+     
      * @param vehicle автомобиль для создания
      * @throws IllegalArgumentException при некорректных данных
      */
@@ -28,7 +37,7 @@ public class VehicleService {
 
     /**
      * Находит автомобиль по идентификатору.
-
+     
      * @param id идентификатор автомобиля
      * @return автомобиль
      * @throws IllegalArgumentException если автомобиль не найден
@@ -44,7 +53,7 @@ public class VehicleService {
 
     /**
      * Возвращает список всех автомобилей.
-
+     
      * @return список автомобилей
      */
     public List<Vehicle> getAllVehicles() {
@@ -52,8 +61,8 @@ public class VehicleService {
     }
 
     /**
-     * Обновляет автомобиль.
-
+     * Обновляет данные автомобиля.
+     
      * @param vehicle автомобиль для обновления
      * @throws IllegalArgumentException если автомобиль не найден
      */
@@ -66,7 +75,7 @@ public class VehicleService {
 
     /**
      * Удаляет автомобиль по идентификатору.
-
+     
      * @param id идентификатор автомобиля
      * @throws IllegalArgumentException если автомобиль не найден
      */
@@ -79,8 +88,8 @@ public class VehicleService {
 
     /**
      * Проверяет корректность данных автомобиля.
-
-     * @param vehicle  автомобиль для проверки
+     
+     * @param vehicle автомобиль для проверки
      * @param isUpdate флаг, указывающий, является ли операция обновлением
      * @throws IllegalArgumentException при некорректных данных
      */
@@ -91,8 +100,7 @@ public class VehicleService {
         if (isUpdate && (vehicle.getId() == null || vehicle.getId() <= 0)) {
             throw new IllegalArgumentException("Идентификатор автомобиля должен быть положительным");
         }
-        if (vehicle.getClient() == null || vehicle.getClient().getId() == null ||
-                vehicle.getClient().getId() <= 0) {
+        if (vehicle.getClient() == null || vehicle.getClient().getId() == null || vehicle.getClient().getId() <= 0) {
             throw new IllegalArgumentException("Идентификатор клиента должен быть положительным");
         }
         if (vehicle.getLicensePlate() == null || vehicle.getLicensePlate().trim().isEmpty()) {
@@ -102,9 +110,9 @@ public class VehicleService {
 
     /**
      * Проверяет корректность идентификатора.
-
-     * @param id      идентификатор
-     * @param field   название поля для сообщения об ошибке
+     
+     * @param id идентификатор
+     * @param field название поля для сообщения об ошибке
      * @throws IllegalArgumentException при некорректном идентификаторе
      */
     private void validateId(Long id, String field) {

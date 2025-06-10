@@ -1,0 +1,62 @@
+[33mcommit 4b032babecba776e3db4dba5c16bbf06bc697a88[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Merge: 86eac54 948e31d
+Author: Iampaulson1996 <89484917+Iampaulson1996@users.noreply.github.com>
+Date:   Thu May 15 16:20:59 2025 +0300
+
+    Merge pull request #3 from Iampaulson1996/addTest-andSomeCorrection
+    
+    Добавлены тесты и исправлены ошибки
+
+[33mcommit 948e31d837d902e1e4a57392e9d844e5548a58f9[m[33m ([m[1;31morigin/addTest-andSomeCorrection[m[33m, [m[1;32maddTest-andSomeCorrection[m[33m)[m
+Author: Paul <Iampaulson1996@gmail.com>
+Date:   Thu May 15 16:16:45 2025 +0300
+
+    Добавлены тесты и исправлены ошибки
+
+[33mcommit 86eac540c70922f0d0d76968821077fc0e05015b[m
+Merge: 151087a 70d710d
+Author: Iampaulson1996 <89484917+Iampaulson1996@users.noreply.github.com>
+Date:   Tue May 13 11:32:09 2025 +0300
+
+    Merge pull request #2 from Iampaulson1996/feature/addHibernate
+    
+    Переводим приложение на ОРМ Hibernate
+
+[33mcommit 70d710de4f657b973f0195544058bd37c9258ffb[m[33m ([m[1;31morigin/feature/addHibernate[m[33m, [m[1;32mfeature/addHibernate[m[33m)[m
+Author: Paul <Iampaulson1996@gmail.com>
+Date:   Tue May 13 11:30:22 2025 +0300
+
+    Переводим приложение на ОРМ Hibernate
+
+[33mcommit 151087a299ba585a7f213582e1db038ef824baf9[m[33m ([m[1;32mfix-and-tests[m[33m)[m
+Author: Paul <Iampaulson1996@gmail.com>
+Date:   Tue May 13 11:06:20 2025 +0300
+
+    Добавлена папка ресурсов, файл init.sql
+
+[33mcommit d89b38f4fd88f5e53fc41a14fc3e0dafc6ecaffe[m[33m ([m[1;31morigin/feature/hibernate[m[33m, [m[1;32mfeature/hibernate[m[33m)[m
+Merge: f3077b2 f555720
+Author: Iampaulson1996 <89484917+Iampaulson1996@users.noreply.github.com>
+Date:   Tue May 13 10:47:09 2025 +0300
+
+    Merge pull request #1 from Iampaulson1996/feature/JDBC
+    
+    Реализация консольного приложения на JDBC
+
+[33mcommit f5557206bd0ccb49e1934554e2b61811d18a6145[m[33m ([m[1;31morigin/feature/JDBC[m[33m, [m[1;32mfeature/JDBC[m[33m)[m
+Author: Paul <Iampaulson1996@gmail.com>
+Date:   Tue May 13 10:44:45 2025 +0300
+
+    Реализация консольного приложения на JDBC
+
+[33mcommit f3077b244bc64461b469f65b0f71b148aaec2d00[m
+Author: Paul <Iampaulson1996@gmail.com>
+Date:   Tue May 13 10:31:16 2025 +0300
+
+    Добавлен .gitignore
+
+[33mcommit 28f34a5d5db58c5a5328c7a8edf115f880a16d0c[m
+Author: Paul <Iampaulson1996@gmail.com>
+Date:   Tue May 13 10:22:59 2025 +0300
+
+    Initial commit: добавлена начальная структура проекта

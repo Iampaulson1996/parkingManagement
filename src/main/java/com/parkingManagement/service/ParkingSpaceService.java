@@ -2,6 +2,8 @@ package com.parkingManagement.service;
 
 import com.parkingManagement.dao.ParkingSpaceDao;
 import com.parkingManagement.model.ParkingSpace;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
@@ -9,17 +11,24 @@ import java.util.Set;
 /**
  * Сервис для управления парковочными местами в системе управления парковкой.
  */
+@Service
 public class ParkingSpaceService {
     private static final Set<String> VALID_TYPES = Set.of("REGULAR", "DISABLED", "VIP");
     private final ParkingSpaceDao parkingSpaceDao;
 
+    /**
+     * Конструктор сервиса парковочных мест.
+     
+     * @param parkingSpaceDao DAO для доступа к данным парковочных мест
+     */
+    @Autowired
     public ParkingSpaceService(ParkingSpaceDao parkingSpaceDao) {
         this.parkingSpaceDao = parkingSpaceDao;
     }
 
     /**
      * Создаёт новое парковочное место с проверкой данных.
-
+     
      * @param parkingSpace парковочное место для создания
      * @throws IllegalArgumentException при некорректных данных
      */
@@ -30,7 +39,7 @@ public class ParkingSpaceService {
 
     /**
      * Находит парковочное место по идентификатору.
-
+     
      * @param id идентификатор парковочного места
      * @return парковочное место
      * @throws IllegalArgumentException если место не найдено
@@ -46,7 +55,7 @@ public class ParkingSpaceService {
 
     /**
      * Возвращает список всех парковочных мест.
-
+     
      * @return список парковочных мест
      */
     public List<ParkingSpace> getAllParkingSpaces() {
@@ -54,8 +63,8 @@ public class ParkingSpaceService {
     }
 
     /**
-     * Обновляет парковочное место.
-
+     * Обновляет данные парковочного места.
+     
      * @param parkingSpace парковочное место для обновления
      * @throws IllegalArgumentException если место не найдено
      */
@@ -68,7 +77,7 @@ public class ParkingSpaceService {
 
     /**
      * Удаляет парковочное место по идентификатору.
-
+     
      * @param id идентификатор парковочного места
      * @throws IllegalArgumentException если место не найдено
      */
@@ -81,9 +90,9 @@ public class ParkingSpaceService {
 
     /**
      * Проверяет корректность данных парковочного места.
-
+     
      * @param parkingSpace парковочное место для проверки
-     * @param isUpdate     флаг, указывающий, является ли операция обновлением
+     * @param isUpdate флаг, указывающий, является ли операция обновлением
      * @throws IllegalArgumentException при некорректных данных
      */
     private void validateParkingSpace(ParkingSpace parkingSpace, boolean isUpdate) {
@@ -93,8 +102,7 @@ public class ParkingSpaceService {
         if (isUpdate && (parkingSpace.getId() == null || parkingSpace.getId() <= 0)) {
             throw new IllegalArgumentException("Идентификатор места должен быть положительным");
         }
-        if (parkingSpace.getParkingLot() == null || parkingSpace.getParkingLot().getId() == null ||
-                parkingSpace.getParkingLot().getId() <= 0) {
+        if (parkingSpace.getParkingLot() == null || parkingSpace.getParkingLot().getId() == null || parkingSpace.getParkingLot().getId() <= 0) {
             throw new IllegalArgumentException("Идентификатор парковки должен быть положительным");
         }
         if (parkingSpace.getSpaceNumber() == null || parkingSpace.getSpaceNumber().trim().isEmpty()) {
@@ -110,9 +118,9 @@ public class ParkingSpaceService {
 
     /**
      * Проверяет корректность идентификатора.
-
-     * @param id      идентификатор
-     * @param field   название поля для сообщения об ошибке
+     
+     * @param id идентификатор
+     * @param field название поля для сообщения об ошибке
      * @throws IllegalArgumentException при некорректном идентификаторе
      */
     private void validateId(Long id, String field) {
