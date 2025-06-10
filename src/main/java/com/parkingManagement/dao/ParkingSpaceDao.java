@@ -2,25 +2,20 @@ package com.parkingManagement.dao;
 
 import com.parkingManagement.model.ParkingSpace;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 /**
  * DAO для управления парковочными местами в базе данных с Hibernate.
  */
+@Repository
 public class ParkingSpaceDao {
-    private final EntityManager em;
-
-    /**
-     * Создаёт новый ParkingSpaceDao с указанным EntityManager.
-
-     * @param em менеджер сущностей Hibernate
-     */
-    public ParkingSpaceDao(EntityManager em) {
-        this.em = em;
-    }
+    @PersistenceContext
+    private EntityManager em;
 
     /**
      * Создаёт новое парковочное место в базе данных.
