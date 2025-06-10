@@ -2,20 +2,20 @@ package com.parkingManagement.dao;
 
 import com.parkingManagement.model.Client;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 /**
  * DAO для управления клиентами в базе данных с использованием Hibernate.
  */
+@Repository
 public class ClientDao {
-    private final EntityManager em;
-
-    public ClientDao(EntityManager em) {
-        this.em = em;
-    }
+    @PersistenceContext
+    private EntityManager em;
 
     /**
      * Создаёт нового клиента в базе данных.
